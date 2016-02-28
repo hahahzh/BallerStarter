@@ -1,0 +1,28 @@
+阿里云登录帐号
+user name:
+password:
+
+ECS
+139.196.17.246
+user name:
+password:
+
+RDS
+user name:
+password:
+
+微信公众号
+xueyi@nanqin.cc
+062655Xue
+短信平台
+http://www.yuntongxun.com/api/voice
+
+项目名
+Baller Starter
+
+服务器
+mstsc -v demo.ballerstarter.com
+用户名: fsba
+密码:fsba-304
+
+https://github.comhahahzhBallerStarter.git
