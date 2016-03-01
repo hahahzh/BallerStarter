@@ -33,6 +33,8 @@ public class Member extends Model {
 	public String gender;
 	@MaxSize(30)
 	public String nationality;
+	@MaxSize(20)
+	public String region;
 	@MaxSize(10)
 	public String height;
 	@MaxSize(10)
