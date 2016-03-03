@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import javax.mail.internet.InternetAddress;
 
+import controllers.CRUD.ObjectType;
 import models.AdminManagement;
 import models.Blood;
 import models.CheckDigit;
@@ -19,6 +20,7 @@ import models.Constellation;
 import models.Job;
 import models.Member;
 import models.MemberPoint;
+import models.Result;
 import models.Session;
 import models.Team;
 import net.sf.json.JSONArray;
@@ -37,7 +39,6 @@ import utils.Coder;
 import utils.JSONUtil;
 import utils.SendMail;
 import utils.StringUtil;
-import controllers.CRUD.ObjectType;
 
 /**
  * Baller Starter主接口
@@ -266,9 +267,9 @@ public class Master extends Controller {
 		Member m = s.member;
 		List<MemberPoint> mps = MemberPoint.find("byMember", m).fetch();
 		JSONObject results = initResultJSON();
-		JSONObject data = initResultJSON();
 		if (!mps.isEmpty()) {
 			JSONArray datalist = initResultJSONArray();
+			JSONObject data = initResultJSON();
 			for(MemberPoint mp:mps){
 				data.put("match", mp.match);
 				data.put("score", mp.score);
@@ -368,38 +369,100 @@ public class Master extends Controller {
 			results.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + z);
 		}
 		results.put("name", t.name);
-		if(t.logo != null && t.logo.exists()){
-			results.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + z);
+		if(t.coach_img != null && t.coach_img.exists()){
+			results.put("coach_img", "/c/download?id=" + t.id + "&fileID=coach_img&entity=" + t.getClass().getName() + "&z=" + z);
 		}
-		results.put("nickname", t.nickname);
-		results.put("birthday", t.birthday);
-		results.put("gender", t.gender);
-		results.put("nationality", t.nationality);
-		results.put("region", t.region);
-		results.put("height", t.height);
-		results.put("weight", t.weight);
-		results.put("number", t.number);
-		results.put("team", t.team);
-		results.put("job1", t.job1);
-		results.put("job2", t.job2);
-		results.put("Specialty", t.Specialty);
-		if(t.img_ch != null && t.img_ch.exists()){
-			results.put("img_ch", "/c/download?id=" + t.id + "&fileID=img_ch&entity=" + t.getClass().getName() + "&z=" + z);
-		}else{
-			if(t.gender == null){
-				results.put("img_ch", "/public/images/boy.jpg");
-			}else{
-				results.put("img_ch", "/public/images/girl.jpg");
+		results.put("coach", t.coach);
+		if(t.captain_img != null && t.captain_img.exists()){
+			results.put("captain_img", "/c/download?id=" + t.id + "&fileID=captain_img&entity=" + t.getClass().getName() + "&z=" + z);
+		}
+		results.put("captain", t.captain);
+		results.put("contact", t.contact);
+		JSONArray datalist = initResultJSONArray();
+		if(t.members.size() >0){
+			JSONObject data = initResultJSON();
+			for(Member m:t.members){
+				data.put("name", m.name);
+				data.put("number", m.number);
+				data.put("job1", m.job1);
+				data.put("job2", m.job2);
+				data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
+				datalist.add(data);
 			}
 		}
-		results.put("qq", t.qq);
-		results.put("email", t.email);
-		results.put("phone", t.phone);
-		results.put("weixin", t.weixin);
-		results.put("constellation", t.constellation);
-		results.put("blood", t.blood);
-		results.put("updated_at_ch", m.updated_at_ch);
-
+		results.put("members", datalist);
+		results.put("updated_at_ch", t.updated_at_ch);
+		renderSuccess(results);
+	}
+	
+	/**
+	 * 获取球队信息2
+	 * 
+	 * @param z
+	 */
+	public static void getAllTeamInfo(@Required String z) {
+		
+		if (Validation.hasErrors()) {
+			renderFail("error_parameter_required");
+		}
+		
+		Session s = sessionCache.get();
+		if(s == null){
+			renderFail("error_session_expired");
+		}
+				
+		List<Team> ts = Team.findAll();
+		
+		JSONObject results = initResultJSON();
+		JSONArray datalist = initResultJSONArray();
+		if(ts.isEmpty() && ts.size() > 0){
+			JSONObject data = initResultJSON();
+			for(Team t:ts){
+				data.put("id", t.id);
+				data.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + z);
+				data.put("name", t.name);
+				datalist.add(data);
+			}
+			results.put("list", datalist);
+		}
+		
+		renderSuccess(results);
+	}
+	
+	/**
+	 * 获取球队积分
+	 * 
+	 * @param z
+	 */
+	public static void getTeamPoint(String teamId, @Required String z) {
+		
+		Session s = sessionCache.get();
+		if(s == null){
+			renderFail("error_session_expired");
+		}
+				
+		List<Result> ts = Result.find("home_team_id", teamId).first();
+		List<Result> ts2 = Result.find("visiting_team_id", teamId).first();
+		ts.addAll(ts2);
+		
+		JSONObject results = initResultJSON();
+		JSONArray datalist = initResultJSONArray();
+		if(ts.isEmpty() && ts.size() > 0){
+			JSONObject data = initResultJSON();
+			for(Result t:ts){
+				data.put("game", t.game);
+				data.put("round", t.round);
+				data.put("home_team", t.home_team);
+				data.put("visiting_team", t.visiting_team);
+				data.put("home_team_point", t.home_team_point);
+				data.put("visiting_team_point", t.visiting_team_point);
+				data.put("home_team_integral", t.home_team_integral);
+				data.put("visiting_team_integral", t.visiting_team_integral);
+				data.put("date", t.date);
+				datalist.add(data);
+			}
+			results.put("list", datalist);
+		}
 		renderSuccess(results);
 	}
 	
