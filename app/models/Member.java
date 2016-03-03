@@ -1,19 +1,14 @@
 package models;
 
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import play.data.validation.MaxSize;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.db.jpa.Model;
-import utils.MBTVariable;
-import utils.StringUtil;
 import controllers.CRUD.Hidden;
 
 @Table(name = "members")
@@ -24,6 +19,7 @@ public class Member extends Model {
 	public Date updated_at_ch;
 	@Hidden
 	public String openID;
+	public String pwd;
 	@Required
 	@MaxSize(20)
 	public String name;
@@ -42,9 +38,9 @@ public class Member extends Model {
 	public Integer number;
 	public String team;
 	@MaxSize(10)
-	public String job1;
+	public Job job1;
 	@MaxSize(10)
-	public String job2;
+	public Job job2;
 	@MaxSize(1000)
 	public String Specialty;
 	public Blob img_ch;
@@ -53,11 +49,11 @@ public class Member extends Model {
 	@MaxSize(20)
 	public String qq;
 	@MaxSize(20)
-	public String weixin;
-	@MaxSize(20)
 	public String email;
 	@MaxSize(20)
 	public String phone;
+	@MaxSize(20)
+	public String weixin;
 	public Constellation constellation;
 	public Blood blood;
 	

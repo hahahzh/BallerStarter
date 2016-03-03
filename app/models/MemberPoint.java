@@ -12,6 +12,7 @@ public class MemberPoint extends Model {
 	@OneToOne
 	public Member member;
 	public String match;
+	public String score;
 	public Integer point;
 	
 	public String toString() {

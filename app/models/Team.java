@@ -29,7 +29,7 @@ public class Team extends Model {
 	@MaxSize(50)
 	public String contact;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "team")
-    public List<Member> members;	
+    public List<Member> members;
 	public Date updated_at_ch;
 	public String toString() {
 		return name;
