@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
 	<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
 	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<script src="/public/javascripts/main.js"></script>
 </head>
 <body>
 	<div data-role="page" data-theme="a">
@@ -15,22 +16,26 @@
 			<h1>注册</h1>
 		</div>
 <div data-role="content">
-    <form method="post" action="demoform.asp">
+    <form method="post" id="regForm" action="/c/r">
     <div class="ui-grid-a yj">
       <label for="fname">手机号:</label>
-      <input type="text" name="fname" id="fname">
+      <input type="text" name="phone" id="phone">
     </div>
       <br/>
      <div class="ui-grid-a yj">
      <label for="fname">验证码:</label>
      <div class="ui-block-a">
-     <input type="text" name="fname" id="fname" >
+     <input type="text" name="vc" id="vc" >
      </div>
      <div class="ui-block-b" style="right: 0;">
      	<input type="button" data-inline="true" value="免费获取">
      </div>
    </div>
-   
+   <br/>
+	<div class="ui-grid-a yj">
+      <label for="fname">设置密码:</label>
+      <input type="password" name="pwd" id="pwd">
+    </div>
       <div data-role="content">
   <input type="submit" value="提交">
   </div>
@@ -42,4 +47,14 @@
 		 
 </div>
 </body>
+<script type="text/javascript">
+$(document).ready(function(){
+    $('#regForm').bind('submit', function(){
+    	regSubmit(this, function(data){
+            alert(data);
+        });
+        return false;
+    });
+});
+</script>
 </html>

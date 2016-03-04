@@ -12,11 +12,11 @@ import java.util.UUID;
 
 import javax.mail.internet.InternetAddress;
 
-import controllers.CRUD.ObjectType;
 import models.AdminManagement;
 import models.Blood;
 import models.CheckDigit;
 import models.Constellation;
+import models.Game;
 import models.Job;
 import models.Member;
 import models.MemberPoint;
@@ -39,6 +39,7 @@ import utils.Coder;
 import utils.JSONUtil;
 import utils.SendMail;
 import utils.StringUtil;
+import controllers.CRUD.ObjectType;
 
 /**
  * Baller Starter主接口
@@ -400,7 +401,7 @@ public class Master extends Controller {
 	 * 
 	 * @param z
 	 */
-	public static void getAllTeamInfo(@Required String z) {
+	public static void getAllTeamList(@Required String z) {
 		
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
@@ -460,6 +461,92 @@ public class Master extends Controller {
 				data.put("visiting_team_integral", t.visiting_team_integral);
 				data.put("date", t.date);
 				datalist.add(data);
+			}
+			results.put("list", datalist);
+		}
+		renderSuccess(results);
+	}
+	
+	/**
+	 * 获取新闻
+	 * 
+	 * @param z
+	 */
+	public static void getNewsList(@Required String z) {
+		
+		if (Validation.hasErrors()) {
+			renderFail("error_parameter_required");
+		}
+		
+		Session s = sessionCache.get();
+		if(s == null){
+			renderFail("error_session_expired");
+		}
+				
+		List<Constellation> cs = Constellation.findAll();
+		
+		JSONObject results = initResultJSON();
+		JSONArray datalist = initResultJSONArray();
+		if(cs.isEmpty() && cs.size() > 0){
+			JSONObject data = initResultJSON();
+			for(Constellation c:cs){
+				data.put("id", c.id);
+				data.put("name", c.name);
+				datalist.add(data);
+			}
+			results.put("list", datalist);
+		}
+		
+		renderSuccess(results);
+	}
+	
+	/**
+	 * 获取赛事
+	 * 
+	 * @param z
+	 */
+	public static void getGameList(@Required String z) {
+		
+		if (Validation.hasErrors()) {
+			renderFail("error_parameter_required");
+		}
+		
+		Session s = sessionCache.get();
+		if(s == null){
+			renderFail("error_session_expired");
+		}
+				
+		Game g = Game.find("").first();
+		
+		JSONObject results = initResultJSON();
+		
+		if(g != null){
+			
+			results.put("id", g.id);
+			results.put("name", g.name);
+			results.put("logo", "/c/download?id=" + g.id + "&fileID=logo&entity=" + g.getClass().getName() + "&z=" + z);
+			results.put("prize", g.prize);
+			results.put("schedule", g.schedule);
+			results.put("startDate", g.startDate);
+			results.put("endDate", g.endDate);
+			results.put("describtion", g.describtion);
+			
+			JSONArray datalist = initResultJSONArray();
+			
+			List<Result> rs = Result.find("byGame", g).fetch();
+			if(rs.size() > 0){
+				JSONObject data = initResultJSON();
+				for(Result r:rs){
+					data.put("round", r.round);
+					data.put("home_team", r.home_team);
+					data.put("visiting_team", r.visiting_team);
+					data.put("home_team_point", r.home_team_point);
+					data.put("visiting_team_point", r.visiting_team_point);
+					data.put("home_team_integral", r.home_team_integral);
+					data.put("visiting_team_integral", r.visiting_team_integral);
+					data.put("date", r.date);
+					datalist.add(data);
+				}
 			}
 			results.put("list", datalist);
 		}

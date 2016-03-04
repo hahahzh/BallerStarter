@@ -4,6 +4,9 @@
 
 # Home page
 GET     /                                       Application.index
+*		/c/r									Master.register
+*		/c/p/gmi								Master.getMemberInfo
+*		/c/p/umi								Master.updateMemberInfo
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
