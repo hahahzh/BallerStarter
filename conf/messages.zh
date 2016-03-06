@@ -86,6 +86,9 @@ secure.signin=登陆
 secure.error=错误的用户名或密码.
 secure.logout=您已经退出.
 
+mail_show_name=Baller Starter Service
+mail_resetpassword_title=[密码重置]Baller Starter电子客户中心
+
 keyword=关键字
 AdminManagements=用户管理(管理员)
 AdminManagement=用户管理原

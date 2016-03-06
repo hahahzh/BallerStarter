@@ -38,6 +38,7 @@ import play.mvc.Http.Header;
 import utils.Coder;
 import utils.JSONUtil;
 import utils.SendMail;
+import utils.SendSMSMy;
 import utils.StringUtil;
 import controllers.CRUD.ObjectType;
 
@@ -93,8 +94,8 @@ public class Master extends Controller {
 	 * 
 	 * @param sessionID
 	 */
-	@Before(unless={"checkDigit","register", "login", "sendResetPasswordMail", "download", 
-			"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological"},priority=1)
+	@Before(unless={"checkDigit","register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
+			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological"},priority=1)
 	public static void validateSessionID(@Required String z) {
 		
 		Session s = Session.find("bySessionID",z).first();
@@ -228,7 +229,7 @@ public class Master extends Controller {
 		results.put("team", m.team);
 		results.put("job1", m.job1);
 		results.put("job2", m.job2);
-		results.put("Specialty", m.Specialty);
+		results.put("specialty", m.Specialty);
 		if(m.img_ch != null && m.img_ch.exists()){
 			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
 		}else{
@@ -238,6 +239,7 @@ public class Master extends Controller {
 				results.put("img_ch", "/public/images/girl.jpg");
 			}
 		}
+		results.put("auth", m.isAuth);
 		results.put("qq", m.qq);
 		results.put("email", m.email);
 		results.put("phone", m.phone);
@@ -632,31 +634,28 @@ public class Master extends Controller {
 	 * 
 	 * @param m_number
 	 */
-	public static void checkDigit(@Required String m_number) {
+	public static void checkDigit(@Required String phone) {
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
 		}
-		if(!Validation.phone(SUCCESS, m_number).ok){
+		if(!Validation.phone(SUCCESS, phone).ok || phone.length() != 11){
 			renderFail("error_parameter_required");
 		}
 		Random r = new Random();
-		int n = Math.abs(r.nextInt())/10000;
+		String n = String.valueOf(Math.random()).substring(2, 6);
 		
 		try {
-			String s = "1110";// SDKTestSendTemplateSMS.sendMsg(m_number, play.i18n.Messages.get("verification_msg",n));
-			if(!s.startsWith("result=0")){
-				play.Logger.error("checkDigit: result="+s+" PNumber="+m_number+" digit="+n);
-				renderText(play.i18n.Messages.get("error_verification_code"));
-			}
+			boolean s = SendSMSMy.sendMsg(phone, n, "5");
+			if(!s)renderFail("error_unknown");
 			
-			CheckDigit cd = CheckDigit.find("m=?", m_number).first();
+			CheckDigit cd = CheckDigit.find("m=?", phone).first();
 			if(cd == null)cd = new CheckDigit();
 			cd.d = n;
 			cd.updatetime = new Date().getTime();
-			cd.m = m_number;
+			cd.m = phone;
 			cd._save();
 		} catch (Exception e) {
-			play.Logger.error("checkDigit: PNumber="+m_number+" digit="+n);
+			play.Logger.error("checkDigit: PNumber="+phone+" digit="+n);
 			play.Logger.error(e.getMessage());
 			renderText(play.i18n.Messages.get("error_verification_code_sys"));
 		}
@@ -669,22 +668,19 @@ public class Master extends Controller {
 	 * 
 	 * @param z
 	 */
-	public static void register(@Required String z) {
+	public static void register(@Required String phone, @Required String pwd, @Required String vc) {
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
 		}
 
 		try {			
-			byte[] b = Coder.decryptBASE64(z);
-			String src = new String(b);
-			String[] arr = src.split("\\|");
+			
 		
-			int i = Integer.parseInt(arr[7]);
-			CheckDigit c = CheckDigit.find("d=?", i).first();
+			CheckDigit c = CheckDigit.find("d=?", vc).first();
 			if(c == null){
 				renderFail("error_checkdigit");
 			}
-			if(!c.m.equals(arr[6])){
+			if(!c.m.equals(phone)){
 				renderFail("error_checkdigit");
 			}
 			if(new Date().getTime() - c.updatetime > 1800000){
@@ -692,25 +688,18 @@ public class Master extends Controller {
 				renderFail("error_checkdigit");
 			}
 
-			Member m = Member.find("byM_number", arr[6].trim()).first();
+			Member m = Member.find("byPhone", phone.trim()).first();
 			if(m != null){
 				play.Logger.info("register:error_username_already_used");
 				renderFail("error_username_already_used");
 			}
-//			if(arr[9].contains("@")){
-//				Customer m2 = Customer.find("byEmail", arr[9].trim()).first();
-//				if(m2 != null){
-//					play.Logger.info("register:error_email_already_used");
-//					renderFail("error_email_already_used");
-//				}
-//			}
 			
 			m = new Member();
-			m.phone = arr[0];
-			m.pwd = arr[1];
+			m.phone = phone;
+			m.pwd = pwd;
 			m.updated_at_ch = new Date();
-			m.save();			
-			c.delete();
+			m.save();
+			//c.delete();
 			
 			Session s = new Session();
 			s.member = m;
@@ -719,7 +708,6 @@ public class Master extends Controller {
 			s.save();
 			
 			JSONObject results = initResultJSON();
-			results.put("uid", m.getId());
 			results.put("phone", m.phone);
 			results.put("session", s.sessionID);
 			play.Logger.info("register:OK "+m.phone);
@@ -749,18 +737,19 @@ public class Master extends Controller {
 			renderFail("error_parameter_required");
 		}
 
-		Member m = Member.find("byM_number", name).first();
+		Member m = Member.find("byPhone", name).first();
 		
 		if(m == null){
 			m = Member.find("byEmail", name).first();
 			if(m == null)m = Member.find("byOpenID", name).first();
+			if(m == null)m = Member.find("byWeixin", name).first();
 		}
 		
 		if(m == null || !m.pwd.equals(pwd)){
 			renderFail("error_username_or_password_not_match");
 		}
 		
-		Session s = Session.find("byC", m).first();
+		Session s = Session.find("member_openid=?", m.id).first();
 		if(s == null){
 			s = new Session();
 			s.member = m;
@@ -774,12 +763,8 @@ public class Master extends Controller {
 		sessionCache.set(s);
 		
 		JSONObject results = initResultJSON();
-		results.put("uid", m.getId());
-		results.put("phone", m.phone);
-		results.put("name", m.nickname);
 		results.put("session", s.sessionID);
 		play.Logger.info("login:OK "+m.phone);
-				
 		renderSuccess(results);
 	}
 	
@@ -818,7 +803,7 @@ public class Master extends Controller {
                     renderFail("error_parameter_required");
             }
 
-            Member m = Member.find("byM_number", p).first();
+            Member m = Member.find("byPhone", p).first();
             if (m == null) {
                 m = Member.find("byWeixin", m).first();
                 if(m == null){
@@ -860,7 +845,7 @@ public class Master extends Controller {
                             Play.configuration.getProperty("mail.smtp.pass"));
 
             mail.setSubject(Messages.get("mail_resetpassword_title"));
-            mail.setBodyAsText("phone:"+m.phone+"password:"+m.pwd);
+            mail.setBodyAsText("password:"+m.pwd);
 
             String nick = Messages.get("mail_show_name");
             try {
@@ -873,6 +858,36 @@ public class Master extends Controller {
             } catch (Exception e) {
                     renderFail("error_mail_resetpassword");
             }
+            renderSuccess(initResultJSON());
+    }
+	
+	/**
+	 * 重置密码
+	 * 
+	 * @param m
+	 * @throws UnsupportedEncodingException
+	 */
+	@SuppressWarnings("deprecation")
+	public static void sendResetPasswordSMS(@Required String p)
+			throws UnsupportedEncodingException {
+
+            if (Validation.hasErrors()) {
+                    renderFail("error_parameter_required");
+            }
+
+            Member m = Member.find("byPhone", p).first();
+            if (m == null) {
+                m = Member.find("byWeixin", m).first();
+                if(m == null){
+                	List<Member> tmp = Member.find("byEmail", m).fetch();
+                	if(tmp.size() == 0)renderFail("error_username_not_exist");
+                	if(StringUtil.isEmpty(tmp.get(0).email))renderFail("error_email_empty"); 	
+                }
+            }
+
+            if(m == null)renderFail("error_username_not_exist");
+            boolean flag = SendSMSMy.sendMsg(m.phone, m.pwd, "5");
+            if(!flag)renderFail("error_unknown");
             renderSuccess(initResultJSON());
     }
 	

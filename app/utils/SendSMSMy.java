@@ -1,16 +1,21 @@
 package utils;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Set;
 
 import com.cloopen.rest.sdk.CCPRestSmsSDK;
 
-public class SDKTestSendTemplateSMS {
+public class SendSMSMy {
+	private static final String PHONE_NUMBER = "15000993473";
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
+	private static final String INFO_ID = "69558";
+	private static final String MINS = "5";
+
+	private static final String SUCCESS = "000000";
+	
+	public static boolean sendMsg(String p, String c, String mins){
+		boolean results = true;
 		HashMap<String, Object> result = null;
 
 		//初始化SDK
@@ -21,6 +26,7 @@ public class SDKTestSendTemplateSMS {
 		//*沙盒环境（用于应用开发调试）：restAPI.init("sandboxapp.cloopen.com", "8883");*
 		//*生产环境（用户应用上线使用）：restAPI.init("app.cloopen.com", "8883");       *
 		//*******************************************************************************
+//		restAPI.init("sandboxapp.cloopen.com", "8883");
 		restAPI.init("app.cloopen.com", "8883");
 		
 		//******************************注释*********************************************
@@ -28,7 +34,7 @@ public class SDKTestSendTemplateSMS {
 		//*ACOUNT SID和AUTH TOKEN在登陆官网后，在“应用-管理控制台”中查看开发者主账号获取*
 		//*参数顺序：第一个参数是ACOUNT SID，第二个参数是AUTH TOKEN。                   *
 		//*******************************************************************************
-		restAPI.setAccount("", "");
+		restAPI.setAccount("8a48b55152f73add01531179f4d83038", "eabf161947d54488bd198cfeb3c9a98c");
 		
 		
 		//******************************注释*********************************************
@@ -36,7 +42,7 @@ public class SDKTestSendTemplateSMS {
 		//*测试开发可使用“测试Demo”的APP ID，正式上线需要使用自己创建的应用的App ID     *
 		//*应用ID的获取：登陆官网，在“应用-应用列表”，点击应用名称，看应用详情获取APP ID*
 		//*******************************************************************************
-		restAPI.setAppId("");
+		restAPI.setAppId("aaf98f8952f7367a0153120b3de33188");
 		
 		
 		//******************************注释****************************************************************
@@ -53,10 +59,10 @@ public class SDKTestSendTemplateSMS {
 		//*result = restAPI.sendTemplateSMS("13800000000","1" ,new String[]{"6532","5"});																		  *
 		//*则13800000000手机号收到的短信内容是：【云通讯】您使用的是云通讯短信模板，您的验证码是6532，请于5分钟内正确输入     *
 		//*********************************************************************************************************************
-		result = restAPI.sendTemplateSMS("","" ,new String[]{"",""});
+		result = restAPI.sendTemplateSMS(p, INFO_ID ,new String[]{c, mins});
 		
 		System.out.println("SDKTestGetSubAccounts result=" + result);
-		if("000000".equals(result.get("statusCode"))){
+		if(SUCCESS.equals(result.get("statusCode"))){
 			//正常返回输出data包体信息（map）
 			HashMap<String,Object> data = (HashMap<String, Object>) result.get("data");
 			Set<String> keySet = data.keySet();
@@ -67,7 +73,19 @@ public class SDKTestSendTemplateSMS {
 		}else{
 			//异常返回输出错误码和错误信息
 			System.out.println("错误码=" + result.get("statusCode") +" 错误信息= "+result.get("statusMsg"));
+			results = false;
 		}
+		return results;
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		//SendSMSMy.sendMsg("15000993473", "1234516", "5");
+		Random r = new Random();
+		int n = Math.abs(r.nextInt())/10000;
+		System.out.println(String.valueOf(Math.random()).substring(2, 6));
 	}
 
 }

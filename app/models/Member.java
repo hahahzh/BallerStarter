@@ -3,13 +3,15 @@ package models;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import controllers.CRUD.Hidden;
 import play.data.validation.MaxSize;
 import play.data.validation.Required;
 import play.db.jpa.Blob;
 import play.db.jpa.Model;
-import controllers.CRUD.Hidden;
 
 @Table(name = "members")
 @Entity
@@ -38,8 +40,10 @@ public class Member extends Model {
 	public Integer number;
 	public String team;
 	@MaxSize(10)
+	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
 	public Job job1;
 	@MaxSize(10)
+	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
 	public Job job2;
 	@MaxSize(1000)
 	public String Specialty;
@@ -54,7 +58,9 @@ public class Member extends Model {
 	public String phone;
 	@MaxSize(20)
 	public String weixin;
+	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
 	public Constellation constellation;
+	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
 	public Blood blood;
 	
 	public String toString() {

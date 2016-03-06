@@ -5,6 +5,10 @@
 # Home page
 GET     /                                       Application.index
 *		/c/r									Master.register
+*		/c/cd									Master.checkDigit
+*		/c/l									Master.login
+*		/c/fpm									Master.sendResetPasswordMail
+*		/c/fps									Master.sendResetPasswordSMS
 *		/c/p/gmi								Master.getMemberInfo
 *		/c/p/umi								Master.updateMemberInfo
 

@@ -26,3 +26,12 @@ mstsc -v demo.ballerstarter.com
 ÃÜÂë:fsba-304
 
 https://github.comhahahzhBallerStarter.git
+
+.;C:\Java\jdk\lib\tools.jar;C:\Java\jdk\lib\dt.jar
+
+
+mail.smtp.host=smtp.exmail.qq.com
+mail.smtp.port=465
+mail.smtp.user=xueyi
+mail.smtp.pass=062655Xue
+mail.smtp.from=xueyi@nanqin.cc

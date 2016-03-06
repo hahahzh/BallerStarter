@@ -14,7 +14,7 @@ import play.db.jpa.Model;
 public class CheckDigit extends Model {
 
 	@Index(name = "checkdigit_d")
-	public int d;
+	public String d;
 	@Required
 	public String m;
 	public long updatetime;
