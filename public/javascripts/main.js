@@ -125,7 +125,7 @@ function loginSubmit() {
             name:n,
             pwd:pwd
         };
-	sendRequest("/c/l", "post", data, "text", "/public/html5/personal/info_edit.html", "");
+	sendRequest("/c/l", "post", data, "text", "/public/html5/personal/info_view.html", "");
 }
 
 function sendRequest(url, method, data, dataType, forword, successMsg){
@@ -137,10 +137,15 @@ function sendRequest(url, method, data, dataType, forword, successMsg){
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
         	if(obj.state==1){
-        		sessionStorage.setItem("sessionID", obj.results.session);
+        		if(obj.results.session != null && obj.results.session != ''){
+        			sessionStorage.setItem("sessionID", obj.results.session);
+        		}
         		window.location = forword+"?successMsg="+successMsg;
         	}else{
         		alert(obj.msg);
+        		if(obj.msg == 'session_expired'){
+        			window.location = "/public/html5/login.html";
+        		}
         	}
         }
     });
@@ -152,6 +157,50 @@ function getRequestData(url, method, data, dataType, forword){
 }
 
 function loadInitPersonalData(){
+	var data = {
+            z:sessionStorage.getItem("sessionID")
+        };
+	$.ajax({
+        url: "/c/p/gmi",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$("#img_ch").attr("src", obj.results.img_ch);
+        		$("#name").text(obj.results.name);
+        		$("#nickname").text(obj.results.nickname);
+        		$("#birthday").text(obj.results.birthday);
+        		$("#gender").text(obj.results.gender);
+        		$("#nationality").text(obj.results.nationality);
+        		$("#region").text(obj.results.region);
+        		$("#height").text(obj.results.height+" CM");
+        		$("#weight").text(obj.results.weight+" KG");
+        		$("#number").text(obj.results.number+" 号");
+        		$("#team").text(obj.results.team);
+        		$("#job1").text(obj.results.job1);
+        		$("#job2").text(obj.results.job2);
+        		$("#specialty").text(obj.results.specialty);
+        		$("#auth").text(obj.results.auth);
+        		$("#qq").text(obj.results.qq);
+        		$("#email").text(obj.results.email);
+        		$("#weixin").text(obj.results.weixin);
+            	$("#phone").text(obj.results.phone);
+            	$("#constellation").text(obj.results.constellation);
+            	$("#blood").text(obj.results.blood);
+        	}else{
+        		alert(obj.msg);
+        		if(obj.msg == 'session_expired'){
+        			window.location = "/public/html5/login.html";
+        		}
+        	}	
+        }
+    });
+}
+
+function loadEditPersonalData(){
+	var blood, constellation, job1, job2;
 	var data = {
             z:sessionStorage.getItem("sessionID")
         };
@@ -184,6 +233,63 @@ function loadInitPersonalData(){
             	$("#phone").val(obj.results.phone);
             	$("#constellation").val(obj.results.constellation);
             	$("#blood").val(obj.results.blood);
+            	blood = obj.results.blood;
+            	constellation = obj.results.constellation;
+            	job1 = obj.results.job1;
+            	job2 = obj.results.job2;
+        	}else{
+        		alert(obj.msg);
+        		if(obj.msg == 'session_expired'){
+        			window.location = "/public/html5/login.html";
+        		}
+        	}	
+        }
+    });
+	
+	$.ajax({
+        url: "/c/p/gmd",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$.each(obj.results.bloodlist, function(index, json) { 
+        			for(var key in json){  
+        				if(blood == json[key]){
+        					$("#blood").prepend("<option value="+key+" selected>"+json[key]+"</option>");
+        				}else{
+        					$("#blood").prepend("<option value="+key+">"+json[key]+"</option>");
+        				}
+        			}
+        		});
+        		$.each(obj.results.constellationlist, function(index, json) { 
+        			for(var key in json){  
+        				if(constellation == json[key]){
+        					$("#constellation").prepend("<option value="+key+" selected>"+json[key]+"</option>");
+        				}else{
+        					$("#constellation").prepend("<option value="+key+">"+json[key]+"</option>");
+        				}
+        			}
+        		});
+        		$.each(obj.results.joblist, function(index, json) { 
+        			for(var key in json){  
+        				if(job1 == json[key]){
+        					$("#job1").prepend("<option value="+key+" selected>"+json[key]+"</option>");
+        				}else{
+        					$("#job1").prepend("<option value="+key+">"+json[key]+"</option>");
+        				}
+        			}
+        		});
+        		$.each(obj.results.joblist, function(index, json) { 
+        			for(var key in json){  
+        				if(job2 == json[key]){
+        					$("#job2").prepend("<option value="+key+" selected>"+json[key]+"</option>");
+        				}else{
+        					$("#job2").prepend("<option value="+key+">"+json[key]+"</option>");
+        				}
+        			}
+        		});
         	}else{
         		alert(obj.msg);
         	}	
@@ -191,6 +297,42 @@ function loadInitPersonalData(){
     });
 }
 
+function personalSubmit(){
+//	$("#img_ch").attr();
+
+	var data = {
+			name: $("#name").val(),
+			nickname: $("#nickname").val(),
+			birthday: $("#birthday").val(),
+			gender: $("#gender").val(),
+			nationality: $("#nationality").val(),
+			region: $("#region").val(),
+			height: $("#height").val(),
+			weight: $("#weight").val(),
+			number: $("#number").val(),
+			team: $("#team").val(),
+			job1: $("#job1").val(),
+			job2: $("#job2").val(),
+			specialty: $("#specialty").val(),
+			auth: $("#auth").val(),
+			qq: $("#qq").val(),
+			email: $("#email").val(),
+			weixin: $("#weixin").val(),
+			phone: $("#phone").val(),
+			constellation: $("#constellation").val(),
+			blood: $("#blood").val(),
+			z:sessionStorage.getItem("sessionID")
+        };
+	
+	sendRequest("/c/p/umi", "post", data, "text", "/public/html5/personal/info_view.html", "修改成功!");
+}
+
+function personalEdit(){
+	window.location = "/public/html5/personal/info_edit.html";
+}
+function personalCancel(){
+	window.location = "/public/html5/personal/info_view.html";
+}
 function handlestatechange(){
 	if (xmlhttp.readyState==4 && xmlhttp.status==200){
 		return xmlhttp;

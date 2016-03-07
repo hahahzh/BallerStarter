@@ -36,6 +36,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
 import utils.Coder;
+import utils.DateUtil;
 import utils.JSONUtil;
 import utils.SendMail;
 import utils.SendSMSMy;
@@ -101,8 +102,77 @@ public class Master extends Controller {
 		Session s = Session.find("bySessionID",z).first();
 		sessionCache.set(s);
 		if (s == null) {
-			renderFail("error_session_expired");
+			renderFail("session_expired");
 		}
+	}
+	
+	public static void getBlood(){
+		List<Blood> ls = Blood.findAll();
+		JSONObject results = initResultJSON();
+		JSONArray datalist = initResultJSONArray();
+		for(Blood b:ls){
+			JSONObject data = initResultJSON();
+			data.put(b.id, b.name);
+			datalist.add(data);
+		}
+		results.put("datalist", datalist);
+		renderSuccess(results);
+	}
+
+	public static void getConstellation(){
+		List<Constellation> ls = Constellation.findAll();
+		JSONObject results = initResultJSON();
+		JSONArray datalist = initResultJSONArray();
+		for(Constellation c:ls){
+			JSONObject data = initResultJSON();
+			data.put(c.id, c.name);
+			datalist.add(data);
+		}
+		results.put("datalist", datalist);
+		renderSuccess(results);
+	}
+
+	public static void getJob(){
+		List<Job> ls = Job.findAll();
+		JSONObject results = initResultJSON();
+		JSONArray datalist = initResultJSONArray();
+		for(Job c:ls){
+			JSONObject data = initResultJSON();
+			data.put(c.id, c.full_name);
+			datalist.add(data);
+		}
+		results.put("datalist", datalist);
+		renderSuccess(results);
+	}
+	
+	public static void getManageData(@Required String z){
+		List<Blood> lbs = Blood.findAll();
+		JSONObject results = initResultJSON();
+		
+		JSONArray bloodlist = initResultJSONArray();
+		for(Blood b:lbs){
+			JSONObject data = initResultJSON();
+			data.put(b.id, b.name);
+			bloodlist.add(data);
+		}
+		results.put("bloodlist", bloodlist);
+		List<Constellation> lcs = Constellation.findAll();
+		JSONArray constellationlist = initResultJSONArray();
+		for(Constellation c:lcs){
+			JSONObject data = initResultJSON();
+			data.put(c.id, c.name);
+			constellationlist.add(data);
+		}
+		results.put("constellationlist", constellationlist);
+		List<Job> ljs = Job.findAll();
+		JSONArray joblist = initResultJSONArray();
+		for(Job c:ljs){
+			JSONObject data = initResultJSON();
+			data.put(c.id, c.full_name);
+			joblist.add(data);
+		}
+		results.put("joblist", joblist);
+		renderSuccess(results);
 	}
 	
 	/**
@@ -111,8 +181,8 @@ public class Master extends Controller {
 	 */
 	public static void updateMemberInfo(String pwd, String name, String nickname, String birthday, 
 			String gender, String nationality, String region, String height, String weight, Integer number,
-			String team, Integer job1, Integer job2, String Specialty, Blob img_ch, Blob identification, String qq,
-			String email, String phone, String weixin, Integer constellation, Integer blood, @Required String z) {
+			String team, Long job1, Long job2, String Specialty, Blob img_ch, Blob identification, String qq,
+			String email, String phone, String weixin, Long constellation, Long blood, @Required String z) {
 
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
@@ -131,7 +201,7 @@ public class Master extends Controller {
 			m.nickname = nickname;
 		}
 		if(!StringUtil.isEmpty(birthday)){
-			m.birthday = new Date(birthday);
+			m.birthday = DateUtil.reverse2Date(birthday);
 		}
 		if(!StringUtil.isEmpty(gender)){
 			m.gender = gender;
@@ -219,7 +289,7 @@ public class Master extends Controller {
 	
 		results.put("name", m.name);
 		results.put("nickname", m.nickname);
-		results.put("birthday", m.birthday);
+		results.put("birthday", SDF_TO_DAY.format(m.birthday));
 		results.put("gender", m.gender);
 		results.put("nationality", m.nationality);
 		results.put("region", m.region);
@@ -227,8 +297,8 @@ public class Master extends Controller {
 		results.put("weight", m.weight);
 		results.put("number", m.number);
 		results.put("team", m.team);
-		results.put("job1", m.job1);
-		results.put("job2", m.job2);
+		results.put("job1", m.job1.full_name);
+		results.put("job2", m.job2.full_name);
 		results.put("specialty", m.Specialty);
 		if(m.img_ch != null && m.img_ch.exists()){
 			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
@@ -239,13 +309,13 @@ public class Master extends Controller {
 				results.put("img_ch", "/public/images/girl.jpg");
 			}
 		}
-		results.put("auth", m.isAuth);
+		results.put("auth", m.isAuth==1?"是":"否");
 		results.put("qq", m.qq);
 		results.put("email", m.email);
 		results.put("phone", m.phone);
 		results.put("weixin", m.weixin);
-		results.put("constellation", m.constellation);
-		results.put("blood", m.blood);
+		results.put("constellation", m.constellation.name);
+		results.put("blood", m.blood.name);
 		results.put("updated_at_ch", m.updated_at_ch);
 
 		renderSuccess(results);
