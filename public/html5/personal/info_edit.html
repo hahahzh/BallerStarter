@@ -48,7 +48,7 @@
 <table class="table table-striped">
 <tr>
   <td>
-  <button type="button" onclick="personalCancel();" class="btn btn-default form-control">取消</button>
+  <button type="button" onclick="jumppage(110);" class="btn btn-default form-control">取消</button>
   </td>
   <td>
 	<button type="button" onclick="personalSubmit();" class="btn btn-default form-control" id="pSubmit">提交</button>
@@ -57,7 +57,7 @@
 <tr>
   <td style="width: 50%;">头像</td>
   <td>
-  <img src="/public/images/girl.jpg" name=img_ch id="img_ch" >
+  <img src="/public/images/girl.jpg" name=v_img_ch id="v_img_ch" onclick="jumppage(112);">
   </td>
 </tr>
 <tr>
@@ -81,7 +81,7 @@
 <tr>
   <td>性别</td>
   <td>
- 	<input type="text" class="form-control" id="gender" name="gender" placeholder="" value="未知">
+ 	<select class="form-control" id="gender"></select>
   </td>
 </tr>
 <tr>
@@ -176,7 +176,7 @@
 </tr>
 <tr>
   <td>
-  <button type="button" onclick="personalCancel();" class="btn btn-default form-control">取消</button>
+  <button type="button" onclick="jumppage(110);" class="btn btn-default form-control">取消</button>
   </td>
   <td>
 	<button type="button" onclick="personalSubmit();" class="btn btn-default form-control" id="pSubmit">提交</button>

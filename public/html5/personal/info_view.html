@@ -36,7 +36,7 @@ $(document).ready(function() {
 	
 	successMsg = GetQueryString("successMsg");
 	if(successMsg != null && successMsg != ''){
-		SetSMsg();
+		SetSMsg(successMsg);
 	}else{
 		$("#gmsg").hide();
 	}

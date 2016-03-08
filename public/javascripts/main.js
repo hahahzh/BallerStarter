@@ -55,10 +55,17 @@ function SetRemainTime() {
 }
 
 var msgCount=3;
-function SetSMsg(){
+function SetSMsg(code){
 	curCount = msgCount;
 	$("#gmsg").show();
-	$("#gmsg").text(successMsg);
+	if('1' == code){
+		$("#gmsg").text("注册成功！");
+	}else if('2' == code){
+		$("#gmsg").text("请到注册邮箱查收新密码!");
+	}else if('3' == code){
+		$("#gmsg").text("修改成功!");
+	}
+	
 	InterValObj = window.setInterval(SetSMsgTime, 1000); //启动计时器，1秒执行一次
 }
 //timer处理函数
@@ -94,7 +101,7 @@ function regSubmit() {
             pwd:pwd
         };
 	
-	sendRequest("/c/r", "post", data, "text", "/public/html5/login.html", "注册成功!");
+	sendRequest("/c/r", "post", data, "text", "/public/html5/login.html", 1);
 }
 
 function forgetPWDSubmit() {
@@ -107,7 +114,7 @@ function forgetPWDSubmit() {
 	var data = {
             p:n
         };
-	sendRequest("/c/fps", "post", data, "text", "/public/html5/login.html", "请到注册邮箱查收新密码!");
+	sendRequest("/c/fps", "post", data, "text", "/public/html5/login.html", 2);
 }
 
 function loginSubmit() {
@@ -125,7 +132,7 @@ function loginSubmit() {
             name:n,
             pwd:pwd
         };
-	sendRequest("/c/l", "post", data, "text", "/public/html5/personal/info_view.html", "");
+	sendRequest("/c/l", "post", data, "text", "/public/html5/personal/info_view.html", 0);
 }
 
 function sendRequest(url, method, data, dataType, forword, successMsg){
@@ -157,6 +164,7 @@ function getRequestData(url, method, data, dataType, forword){
 }
 
 function loadInitPersonalData(){
+	
 	var data = {
             z:sessionStorage.getItem("sessionID")
         };
@@ -168,7 +176,7 @@ function loadInitPersonalData(){
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
         	if(obj.state==1){
-        		$("#img_ch").attr("src", obj.results.img_ch);
+        		$("#v_img_ch").attr("src", obj.results.img_ch);
         		$("#name").text(obj.results.name);
         		$("#nickname").text(obj.results.nickname);
         		$("#birthday").text(obj.results.birthday);
@@ -200,7 +208,7 @@ function loadInitPersonalData(){
 }
 
 function loadEditPersonalData(){
-	var blood, constellation, job1, job2;
+	var blood, constellation, job1, job2, gender;
 	var data = {
             z:sessionStorage.getItem("sessionID")
         };
@@ -212,11 +220,17 @@ function loadEditPersonalData(){
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
         	if(obj.state==1){
-        		$("#img_ch").attr("src", obj.results.img_ch);
+        		$("#v_img_ch").attr("src", obj.results.img_ch);
         		$("#name").val(obj.results.name);
         		$("#nickname").val(obj.results.nickname);
         		$("#birthday").val(obj.results.birthday);
-        		$("#gender").val(obj.results.gender);
+        		if('女'==obj.results.gender){
+        			$("#gender").prepend("<option value='男'>男</option>");
+        			$("#gender").prepend("<option value='女' selected>女</option>");
+        		}else{
+        			$("#gender").prepend("<option value='男' selected>男</option>");
+        			$("#gender").prepend("<option value='女'>女</option>");
+        		}
         		$("#nationality").val(obj.results.nationality);
         		$("#region").val(obj.results.region);
         		$("#height").val(obj.results.height);
@@ -297,6 +311,29 @@ function loadEditPersonalData(){
     });
 }
 
+function loadEditPersonalImg(){
+	var data = {
+            z:sessionStorage.getItem("sessionID")
+        };
+	$.ajax({
+        url: "/c/p/gmii",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$("#v_img_ch").attr("src", obj.results.img_ch);
+        	}else{
+        		alert(obj.msg);
+        		if(obj.msg == 'session_expired'){
+        			window.location = "/public/html5/login.html";
+        		}
+        	}
+        }
+    });
+}
+
 function personalSubmit(){
 //	$("#img_ch").attr();
 
@@ -324,20 +361,46 @@ function personalSubmit(){
 			z:sessionStorage.getItem("sessionID")
         };
 	
-	sendRequest("/c/p/umi", "post", data, "text", "/public/html5/personal/info_view.html", "修改成功!");
+	sendRequest("/c/p/umi", "post", data, "text", "/public/html5/personal/info_view.html", 3);
+}
+
+function setPPFileUpload(){
+	$('#img_ch').click();
+	var data = {
+			z:sessionStorage.getItem("sessionID")
+	};
+	$.ajax({
+        url: "/c/p/gmd",
+        type: "post",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$('#v_img_ch').attr("src", obj.results.tf);
+        	}
+        }
+    });
 }
 
 function personalEdit(){
 	window.location = "/public/html5/personal/info_edit.html";
 }
-function personalCancel(){
-	window.location = "/public/html5/personal/info_view.html";
-}
-function handlestatechange(){
-	if (xmlhttp.readyState==4 && xmlhttp.status==200){
-		return xmlhttp;
+function jumppage(page){
+	switch(page){
+	case 110:
+		window.location = "/public/html5/personal/info_view.html";
+		break;
+	case 111:
+		window.location = "/public/html5/personal/info_edit.html";
+		break;
+	case 112:
+		window.location = "/public/html5/personal/info_edit_portrait.html";
+		break;
+	default:
 	}
-} 
+	
+}
 
 function setPData(xmlhttp){
 	if (xmlhttp.readyState==4 && xmlhttp.status==200){
@@ -363,19 +426,3 @@ function setPData(xmlhttp){
 	}
 }
 
-var xmlhttp;
-function InitPipeLineDetails(url) {
-	xmlhttp = null;
-	if (window.XMLHttpRequest) {// code for IE7, Firefox, Opera, etc.
-		xmlhttp = new XMLHttpRequest();
-	} else if (window.ActiveXObject) {// code for IE6, IE5
-		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	if (xmlhttp != null) {
-		xmlhttp.open("GET", url, false);
-		xmlhttp.send(null);
-		return xmlhttp;
-	} else {
-		alert("Your browser does not support XMLHTTP.");
-	}
-}

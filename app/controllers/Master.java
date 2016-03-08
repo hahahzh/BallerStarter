@@ -23,6 +23,7 @@ import models.MemberPoint;
 import models.Result;
 import models.Session;
 import models.Team;
+import models.TempFile;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import play.Play;
@@ -181,7 +182,7 @@ public class Master extends Controller {
 	 */
 	public static void updateMemberInfo(String pwd, String name, String nickname, String birthday, 
 			String gender, String nationality, String region, String height, String weight, Integer number,
-			String team, Long job1, Long job2, String Specialty, Blob img_ch, Blob identification, String qq,
+			String team, Long job1, Long job2, String specialty, Blob img_ch, Blob identification, String qq,
 			String email, String phone, String weixin, Long constellation, Long blood, @Required String z) {
 
 		if (Validation.hasErrors()) {
@@ -230,8 +231,8 @@ public class Master extends Controller {
 		if(job2 != null){
 			m.job2 = Job.findById(job2);
 		}
-		if(!StringUtil.isEmpty(Specialty)){
-			m.Specialty = Specialty;
+		if(!StringUtil.isEmpty(specialty)){
+			m.specialty = specialty;
 		}
 		if(img_ch != null){
 			if(m.img_ch.exists()){
@@ -268,6 +269,31 @@ public class Master extends Controller {
 		renderSuccess(initResultJSON());
 	}
 
+	public static void getMemberImg(@Required String z) {
+		if (Validation.hasErrors()) {
+			renderFail("error_parameter_required");
+		}
+		
+		Session s = sessionCache.get();
+		if(s == null){
+			renderFail("error_session_expired");
+		}
+		Member m = s.member;
+		JSONObject results = initResultJSON();
+	
+		if(m.img_ch != null && m.img_ch.exists()){
+			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
+		}else{
+			if(m.gender == null){
+				results.put("img_ch", "/public/images/boy.jpg");
+			}else{
+				results.put("img_ch", "/public/images/girl.jpg");
+			}
+		}
+
+		renderSuccess(results);
+	}
+	
 	/**
 	 * 获取用户信息
 	 * 
@@ -299,7 +325,7 @@ public class Master extends Controller {
 		results.put("team", m.team);
 		results.put("job1", m.job1.full_name);
 		results.put("job2", m.job2.full_name);
-		results.put("specialty", m.Specialty);
+		results.put("specialty", m.specialty);
 		if(m.img_ch != null && m.img_ch.exists()){
 			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
 		}else{
@@ -314,8 +340,8 @@ public class Master extends Controller {
 		results.put("email", m.email);
 		results.put("phone", m.phone);
 		results.put("weixin", m.weixin);
-		results.put("constellation", m.constellation.name);
-		results.put("blood", m.blood.name);
+		results.put("constellation", m.constellation==null?"":m.constellation.name);
+		results.put("blood", m.blood==null?"":m.blood.name);
 		results.put("updated_at_ch", m.updated_at_ch);
 
 		renderSuccess(results);
@@ -699,6 +725,18 @@ public class Master extends Controller {
 		}
 	}
 	
+	public static void saveTempFile(@Required Blob f, @Required String z){
+		if (Validation.hasErrors()) {
+			renderFail("error_parameter_required");
+		}
+		TempFile tf = new TempFile();
+		tf.tempFile = f;
+		tf.save();
+		JSONObject results = initResultJSON();
+		results.put("tf", "/c/download?id=" + tf.id + "&fileID=tempFile&entity=" + tf.getClass().getName() + "&z=" + z);
+		renderSuccess(results);
+	}
+	
 	/**
 	 * 发送验证码到手机
 	 * 
@@ -711,7 +749,6 @@ public class Master extends Controller {
 		if(!Validation.phone(SUCCESS, phone).ok || phone.length() != 11){
 			renderFail("error_parameter_required");
 		}
-		Random r = new Random();
 		String n = String.valueOf(Math.random()).substring(2, 6);
 		
 		try {

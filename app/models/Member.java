@@ -46,7 +46,7 @@ public class Member extends Model {
 	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
 	public Job job2;
 	@MaxSize(1000)
-	public String Specialty;
+	public String specialty;
 	public Blob img_ch;
 	public Blob identification;
 	public byte isAuth;
