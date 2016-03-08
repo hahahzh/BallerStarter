@@ -14,6 +14,9 @@ GET     /                                       Application.index
 *		/c/p/gmd								Master.getManageData
 *		/c/p/gmii								Master.getMemberImg
 *		/c/stf									Master.saveTempFile
+*		/c/t/gti								Master.getPTeamInfo
+*		/c/t/uti								Master.updateTeamInfo
+
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

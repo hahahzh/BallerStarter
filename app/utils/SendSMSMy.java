@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
@@ -86,6 +87,7 @@ public class SendSMSMy {
 		Random r = new Random();
 		int n = Math.abs(r.nextInt())/10000;
 		System.out.println(String.valueOf(Math.random()).substring(2, 6));
+		System.out.println(new Date().getTime());
 	}
 
 }

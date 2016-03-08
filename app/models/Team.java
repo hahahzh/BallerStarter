@@ -5,11 +5,14 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import play.data.validation.MaxSize;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 import play.db.jpa.Blob;
 import play.db.jpa.Model;
 
@@ -21,14 +24,17 @@ public class Team extends Model {
 	public Blob logo;
 	@Required
 	@MaxSize(20)
+	@Unique
 	public String name;
 	public Blob coach_img;
-	public String coach;
+	@OneToOne(optional = false, cascade = { CascadeType.REFRESH},fetch=FetchType.EAGER)
+	public Member coach;
 	public Blob captain_img;
-	public String captain;
+	@OneToOne(optional = false, cascade = { CascadeType.REFRESH},fetch=FetchType.EAGER)
+	public Member captain;
 	@MaxSize(50)
 	public String contact;
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "team")
+	@OneToMany(fetch=FetchType.LAZY)
     public List<Member> members;
 	public Date updated_at_ch;
 	public String toString() {

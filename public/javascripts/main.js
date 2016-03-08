@@ -57,7 +57,6 @@ function SetRemainTime() {
 var msgCount=3;
 function SetSMsg(code){
 	curCount = msgCount;
-	$("#gmsg").show();
 	if('1' == code){
 		$("#gmsg").text("注册成功！");
 	}else if('2' == code){
@@ -65,7 +64,7 @@ function SetSMsg(code){
 	}else if('3' == code){
 		$("#gmsg").text("修改成功!");
 	}
-	
+	$("#gmsg").show();
 	InterValObj = window.setInterval(SetSMsgTime, 1000); //启动计时器，1秒执行一次
 }
 //timer处理函数
@@ -383,9 +382,6 @@ function setPPFileUpload(){
     });
 }
 
-function personalEdit(){
-	window.location = "/public/html5/personal/info_edit.html";
-}
 function jumppage(page){
 	switch(page){
 	case 110:
@@ -397,9 +393,132 @@ function jumppage(page){
 	case 112:
 		window.location = "/public/html5/personal/info_edit_portrait.html";
 		break;
+	case 120:
+		window.location = "/public/html5/team/info_view.html";
+		break;
+	case 121:
+		window.location = "/public/html5/team/info_edit.html";
+		break;
+	case 122:
+		window.location = "/public/html5/team/info_edit_logo.html";
+		break;
+	case 123:
+		window.location = "/public/html5/team/info_edit_coach.html";
+		break;
+	case 124:
+		window.location = "/public/html5/team/info_edit_captain.html";
+		break;
 	default:
 	}
 	
+}
+
+function loadInitTeamData(){
+	
+	var data = {
+            z:sessionStorage.getItem("sessionID")
+        };
+	$.ajax({
+        url: "/c/t/gti",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$("#v_img_t_logo").attr("src", obj.results.logo);
+        		$("#name").text(obj.results.name);
+        		$("#v_coach_img").attr("src", obj.results.coach_img);
+        		$("#coach").text(obj.results.coach);
+          		$("#v_captain_img").attr("src", obj.results.captain_img);
+        		$("#captain").text(obj.results.captain);
+        		$("#contact").text(obj.results.contact);
+        		$("#updated_at_ch").text(obj.results.updated_at_ch);
+        		str = "";
+        		$.each(obj.results.members, function(index, json) {
+        			str+="<tr><td>";
+        			str+="姓名: "+json.name;
+        			str+="</br>";
+        			str+="场上位置: "+json.job1;
+        			str+="</br>";
+        			str+="号码: "+json.number+" 号";
+        			str+="</br>";
+        			str+="身高: "+json.height+" CM";
+        			str+="</br>";
+        			str+="体重: "+json.weight+" KG";
+        			str+="</td>";
+        			str+="<td>";
+        			str+="<img src='"+json.img_ch+"'>";
+                	str+="</td></tr>";
+        		});
+        		$("#t_v_members").append(str);
+        	}else{
+        		alert(obj.msg);
+        		if(obj.msg == 'session_expired'){
+        			window.location = "/public/html5/login.html";
+        		}
+        	}	
+        }
+    });
+}
+
+function loadEditTeamData(){
+	var data = {
+            z:sessionStorage.getItem("sessionID")
+        };
+	$.ajax({
+        url: "/c/t/gti",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$("#v_img_t_logo").attr("src", obj.results.logo);
+        		$("#name").val(obj.results.name);
+        		$("#v_coach_img").val(obj.results.coach_img);
+        		$("#coach").val(obj.results.coach);
+          		$("#v_captain_img").val(obj.results.captain_img);
+        		$("#captain").val(obj.results.captain);
+        		$("#contact").val(obj.results.contact);
+        		str = "";
+        		$.each(obj.results.members, function(index, json) {
+        			str+="<tr><td>";
+        			str+="姓名: "+json.name;
+        			str+="</br>";
+        			str+="场上位置: "+json.job1;
+        			str+="</br>";
+        			str+="号码: "+json.number+" 号";
+        			str+="</br>";
+        			str+="身高: "+json.height+" CM";
+        			str+="</br>";
+        			str+="体重: "+json.weight+" KG";
+        			str+="</td>";
+        			str+="<td>";
+        			str+="<img src='"+json.img_ch+"'>";
+                	str+="</td></tr>";
+        		});
+        		$("#t_e_members").append(str);
+        	}else{
+        		alert(obj.msg);
+        		if(obj.msg == 'session_expired'){
+        			window.location = "/public/html5/login.html";
+        		}
+        	}	
+        }
+    });
+}
+
+function teamSubmit(){
+	var data = {
+			name: $("#name").val(),
+			coach: $("#coach").val(),
+			captain: $("#captain").val(),
+			contact: $("#contact").val(),
+			z:sessionStorage.getItem("sessionID")
+        };
+	
+	sendRequest("/c/t/uti", "post", data, "text", "/public/html5/team/info_view.html", 3);
 }
 
 function setPData(xmlhttp){

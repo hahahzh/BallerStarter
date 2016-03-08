@@ -34,68 +34,34 @@
 
 
   </head>
-  <body role="document" onload="loadEditTeamData();">
+  <body role="document" onload="loadEditPersonalImg();">
 
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse text-center" style="background-color:#EE8A47;height:5px;">
-          <h5>球队信息 编辑</h5>
+          <h5>个人信息 编辑 头像</h5>
     </nav>
 
 <div class="container theme-showcase" role="main">
 
-	<form method="post" id="teamForm" action="/c/t/gti" class="form-inline">
+	<form method="post" class="form-inline">
     
 <table class="table table-striped">
 <tr>
   <td>
-  <button type="button" onclick="jumppage(120);" class="btn btn-default form-control">取消</button>
-  </td>
-  <td>
-	<button type="button" onclick="teamSubmit();" class="btn btn-default form-control" id="tSubmit">提交</button>
+  <button type="button" onclick="jumppage(111);" class="btn btn-default form-control">取消</button>
   </td>
 </tr>
 <tr>
-  <td style="width: 50%;">LOGO</td>
   <td>
-  <img src="/public/images/girl.jpg" name=v_img_t_logo id="v_img_t_logo" onclick="jumppage(122);">
+  <img src="/public/images/girl.jpg" name=v_img_ch id="v_img_ch" onclick="setPPFileUpload();">
+  <input id="img_ch" type="file" accept="image/png,image/gif,image/jpeg" style="display: none" name="img_ch" />
   </td>
 </tr>
 <tr>
-  <td>名称</td>
   <td>
- 	<input type="text" class="form-control" id="name" name="name" placeholder="" value="未知">
+	<button type="button" onclick="savePPImg();" class="btn btn-default form-control" id="pSubmit">提交</button>
   </td>
 </tr>
-<tr>
-  <td>教练 <input type="text" class="form-control" id="coach" name="coach" placeholder="" value="未知"></td>
-  <td>
- 	<img src="/public/images/girl.jpg" name=v_coach_img id="v_coach_img" onclick="jumppage(123);">
-  </td>
-</tr>
-<tr>
-  <td>队长 <input type="text" class="form-control" id="captain" name="captain" placeholder="" value="未知"></td>
-  <td>
- 	<img src="/public/images/girl.jpg" name=v_captain_img id="v_captain_img" onclick="jumppage(124);">
-  </td>
-</tr>
-<tr>
-  <td>联系方式</td>
-  <td>
- 	<input type="text" class="form-control" id="contact" name="contact" placeholder="" value="未知">
-  </td>
-</tr>
-<tr>
-<tr>
-  <td>
-  <button type="button" onclick="jumppage(120);" class="btn btn-default form-control">取消</button>
-  </td>
-  <td>
-	<button type="button" onclick="teamSubmit();" class="btn btn-default form-control" id="tSubmit">提交</button>
-  </td>
-</tr>
-</table>
-<!-- 球员信息 -->
-<table class="table table-striped" id="t_e_members">
 </table>
 </form>
 

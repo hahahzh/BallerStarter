@@ -7,11 +7,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import javax.mail.internet.InternetAddress;
 
+import controllers.CRUD.ObjectType;
 import models.AdminManagement;
 import models.Blood;
 import models.CheckDigit;
@@ -36,13 +36,11 @@ import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
-import utils.Coder;
 import utils.DateUtil;
 import utils.JSONUtil;
 import utils.SendMail;
 import utils.SendSMSMy;
 import utils.StringUtil;
-import controllers.CRUD.ObjectType;
 
 /**
  * Baller Starter主接口
@@ -223,7 +221,7 @@ public class Master extends Controller {
 			m.number = number;
 		}
 		if(!StringUtil.isEmpty(team)){
-			m.team = team;
+			m.team = Team.find("byName", team).first();
 		}
 		if(job1 != null){
 			m.job1 = Job.findById(job1);
@@ -393,8 +391,12 @@ public class Master extends Controller {
 
 		Session s = sessionCache.get();
 		
-		Team t = Team.find("byCoach", s.member.name).first();
-		if(t == null)Team.find("byCaptain", s.member.name).first();
+		Team t = Team.find("byCoach", s.member).first();
+		if(t == null)Team.find("byCaptain", s.member).first();
+		if(t == null){
+			t = new Team();
+			t.updated_at_ch = new Date();
+		}
 		if(t != null){
 			if(logo != null){
 				if(t.logo.exists()){
@@ -412,7 +414,7 @@ public class Master extends Controller {
 				t.coach_img = coach_img;
 			}
 			if(!StringUtil.isEmpty(coach)){
-				t.coach = coach;
+				t.coach = Member.find("byName", coach).first();
 			}
 			if(captain_img != null){
 				if(t.captain_img.exists()){
@@ -421,24 +423,25 @@ public class Master extends Controller {
 				t.captain_img = coach_img;
 			}
 			if(!StringUtil.isEmpty(captain)){
-				t.captain = captain;
+				t.captain = Member.find("byName", captain).first();
 			}
 			if(!StringUtil.isEmpty(contact)){
 				t.contact = contact;
 			}
+			members = "12,13,14,15,16,17,";
 			if(!StringUtil.isEmpty(members)){
 				String[] ma = members.split(",");
-				List<Member> ls = new ArrayList<Member>();
+				int count = 0;
 				for(String ms:ma){
-					Member m = Member.findById(ms);
-					if(m != null)ls.add(m);
+					if(count > 11)break;
+					Member m = Member.findById(Long.parseLong(ms));
+					if(m != null)t.members.add(m);
+					count++;
 				}
-				t.members = ls;
+				t.members = StringUtil.removalDup(t.members);
 			}
-			
 			t.save();
 		}
-		
 		renderSuccess(initResultJSON());
 	}
 	
@@ -458,10 +461,9 @@ public class Master extends Controller {
 			renderFail("error_session_expired");
 		}
 				
-		Team t = Team.find("byCoach", s.member.name).first();
-		if(t == null)Team.find("byCaptain", s.member.name).first();
-		if(t == null)Team.find("member_id", z).first();
-		
+		Team t = Team.find("byCoach", s.member).first();
+		if(t == null)Team.find("byCaptain", s.member).first();
+				
 		JSONObject results = initResultJSON();
 	
 		if(t.logo != null && t.logo.exists()){
@@ -471,11 +473,11 @@ public class Master extends Controller {
 		if(t.coach_img != null && t.coach_img.exists()){
 			results.put("coach_img", "/c/download?id=" + t.id + "&fileID=coach_img&entity=" + t.getClass().getName() + "&z=" + z);
 		}
-		results.put("coach", t.coach);
+		results.put("coach", t.coach==null?"":t.coach.name);
 		if(t.captain_img != null && t.captain_img.exists()){
 			results.put("captain_img", "/c/download?id=" + t.id + "&fileID=captain_img&entity=" + t.getClass().getName() + "&z=" + z);
 		}
-		results.put("captain", t.captain);
+		results.put("captain", t.captain==null?"":t.captain.name);
 		results.put("contact", t.contact);
 		JSONArray datalist = initResultJSONArray();
 		if(t.members.size() >0){
@@ -483,14 +485,20 @@ public class Master extends Controller {
 			for(Member m:t.members){
 				data.put("name", m.name);
 				data.put("number", m.number);
-				data.put("job1", m.job1);
-				data.put("job2", m.job2);
-				data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
+				data.put("job1", m.job1.full_name);
+				data.put("job2", m.job2.full_name);
+				data.put("height", m.height);
+				data.put("weight", m.weight);
+				if(m.img_ch != null && m.img_ch.exists()){
+					data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
+				}else{
+					data.put("img_ch", "/public/images/boy.jpg");
+				}
 				datalist.add(data);
 			}
 		}
 		results.put("members", datalist);
-		results.put("updated_at_ch", t.updated_at_ch);
+		results.put("updated_at_ch", SDF_TO_DAY.format(t.updated_at_ch));
 		renderSuccess(results);
 	}
 	

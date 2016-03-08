@@ -2,9 +2,11 @@ package models;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import controllers.CRUD.Hidden;
@@ -38,7 +40,8 @@ public class Member extends Model {
 	@MaxSize(10)
 	public String weight;
 	public Integer number;
-	public String team;
+	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH) 
+	public Team team;
 	@MaxSize(10)
 	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
 	public Job job1;

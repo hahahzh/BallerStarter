@@ -4,6 +4,9 @@
  */
 package utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 字符串工具类，存放通用的字符串操作
  * @author kortide
@@ -115,6 +118,14 @@ public abstract class StringUtil {
 		distance = earthRadius * c;
 		return distance;
 	}
+    
+    public static <T> List<T> removalDup(List<T> input){
+         List<T> results = new ArrayList<T>();
+          for (int i=0;i<input.size();i++){
+              if(!results.contains(input.get(i))) results.add(input.get(i));
+          }
+          return results;
+    }
     
     public static void main(String[] args){
     	System.out.print(StringUtil.distanceBetween(31.210015,121.608694, 31.211957, 121.607527));
