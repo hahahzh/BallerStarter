@@ -8,7 +8,7 @@ import java.util.Set;
 import com.cloopen.rest.sdk.CCPRestSmsSDK;
 
 public class SendSMSMy {
-	private static final String PHONE_NUMBER = "15000993473";
+	private static final String PHONE_NUMBER = "";
 
 	private static final String INFO_ID = "69558";
 	private static final String MINS = "5";
@@ -85,8 +85,7 @@ public class SendSMSMy {
 	public static void main(String[] args) {
 		//SendSMSMy.sendMsg("15000993473", "1234516", "5");
 		Random r = new Random();
-		int n = Math.abs(r.nextInt())/10000;
-		System.out.println(String.valueOf(Math.random()).substring(2, 6));
+		String n = String.valueOf(Math.random()).substring(2, 6);
 		System.out.println(new Date().getTime());
 	}
 

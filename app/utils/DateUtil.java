@@ -334,12 +334,27 @@ public class DateUtil {
 	public static double intervalOfHour(Date from, Date to) throws ParseException{
 		double gap = to.getTime() - from.getTime(); 
         return (((gap/1000)/60))/60; 
-    } 
+    }
+	
+	/**
+	 * 返回日期的前后N天日期
+	 * 
+	 * @param d
+	 * @param n
+	 * @return
+	 */
+	public static Date intervalofDay(Date d, int n){
+		Calendar calendar = Calendar.getInstance(); //得到日历
+		calendar.setTime(d);//把当前时间赋给日历
+		calendar.add(Calendar.DAY_OF_MONTH, n);  //设置为前一天
+		return calendar.getTime();   //得到前一天的时间
+	}
 	
 	public static void main(String[] args) {
 		try {
 			double a=DateUtil.intervalOfHour(new Date("2011/12/2 1:00:00"),new Date("2011/12/2 1:10:00"));
-			System.out.println(a);
+			Date d = DateUtil.intervalofDay(new Date(), -5);
+			System.out.println(d);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

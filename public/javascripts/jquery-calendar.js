@@ -200,6 +200,11 @@ var popUpCal = {
 				if (this.selectedMinute == a) timeSelect += '<option value="' + a + '" selected="selected">' +  ((a >= 10) ? a : ('0' + a)) + '</option>';
 				else timeSelect += '<option value="' + a + '">' +  ((a >= 10) ? a : ('0' + a)) + '</option>';
 			}
+			timeSelect +='</select>'+ this.timeSeparators[1] + ' <select id="calendar_second">';
+			for (var a = 0; a < 60; a++) {
+				if (this.selectedMinute == a) timeSelect += '<option value="' + a + '" selected="selected">' +  ((a >= 10) ? a : ('0' + a)) + '</option>';
+				else timeSelect += '<option value="' + a + '">' +  ((a >= 10) ? a : ('0' + a)) + '</option>';
+			}
 			timeSelect +='</select>';
 			
 			if (this.timeSeparators.length == 4) {
@@ -217,7 +222,7 @@ var popUpCal = {
 			'<a id="calendar_close">' + this.closeText + '</a></div>' : '') + 
 			'<div id="calendar_links"><a id="calendar_prev">' + this.prevText + '</a>' +
 			//'<a id="calendar_current">' + this.currentText + '</a>' +
-			'<a id="calendar_current">' + new Date().format("yyyy-mm-dd HH:MM") + '</a>' +
+			'<a id="calendar_current">' + new Date().format("yyyy-mm-dd HH:MM:ss") + '</a>' +
 			'<a id="calendar_next">' + this.nextText + '</a></div>' +
 			'<div id="calendar_header">';
 		//alert(timeSelect);

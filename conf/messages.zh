@@ -29,8 +29,7 @@ error_exists_pay=不能重复领取礼包
 error_checkdigit=校验码过期
 error_over_pay=礼包已发完
 error_permission_denied=游客没有权限使用该操作，请以用户身份登录
-
-
+error_team_su_exist=该球队已报名
 
 crud.title=Baller Starter管理后台
 crud.home=主页
@@ -108,6 +107,7 @@ startDate=比赛开始日
 endDate=比赛结束日
 prize=奖项设置
 Members=队员
+members=队员列表
 Member=队员
 nickname=昵称
 birthday=生日
@@ -126,8 +126,8 @@ qq=QQ号码
 weixin=微信
 email=eMail
 phone=电话号码
-Results=表赛结果
-Result=表赛结果
+Results=比赛结果
+Result=比赛结果
 round=轮次
 home_team=主队
 visiting_team=客队

@@ -9,7 +9,10 @@ import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import controllers.CRUD.Hidden;
 import play.data.validation.MaxSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -36,6 +39,8 @@ public class Team extends Model {
 	public String contact;
 	@OneToMany(fetch=FetchType.LAZY)
     public List<Member> members;
+	@Hidden
+	@Temporal(TemporalType.TIMESTAMP)
 	public Date updated_at_ch;
 	public String toString() {
 		return name;

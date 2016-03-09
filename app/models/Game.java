@@ -1,8 +1,11 @@
 package models;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import play.data.validation.MaxSize;
@@ -13,7 +16,6 @@ import play.db.jpa.Model;
 @Table(name = "games")
 @Entity
 public class Game extends Model {
-	
 	
 	public Blob logo;
 	@Required
@@ -26,6 +28,8 @@ public class Game extends Model {
 	public Date endDate;
 	@MaxSize(1000)
 	public String prize;
+	@OneToMany(fetch=FetchType.LAZY)
+	public List<Team> teams;
 	public String toString() {
 		return name;
 	}

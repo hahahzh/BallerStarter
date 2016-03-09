@@ -16,6 +16,7 @@ GET     /                                       Application.index
 *		/c/stf									Master.saveTempFile
 *		/c/t/gti								Master.getPTeamInfo
 *		/c/t/uti								Master.updateTeamInfo
+*		/c/g/ggi								Master.getGameInfo
 
 
 # Ignore favicon requests
