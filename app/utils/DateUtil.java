@@ -80,16 +80,15 @@ public class DateUtil {
 	 * 
 	 * **/
 
-	public static String toDate(Date... date) {
+	public static String toDate(int flag, Date... date) {
 
-		SimpleDateFormat simple = new SimpleDateFormat(FORMAT_1);
-
+		SimpleDateFormat simple = null;
+		if(flag == 0) simple = new SimpleDateFormat(FORMAT_0);
+		else if(flag == 1) simple = new SimpleDateFormat(FORMAT_1);
+		else simple =  new SimpleDateFormat(FORMAT_2);
 		if (date.length > 0) {
-
 			return simple.format(date[0]);
-
 		}
-
 		return simple.format(new Date());
 
 	}
@@ -168,7 +167,7 @@ public class DateUtil {
 			break;
 
 		default:
-
+			simple = new SimpleDateFormat(FORMAT_0);
 			break;
 
 		}

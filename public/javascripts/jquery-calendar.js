@@ -200,11 +200,6 @@ var popUpCal = {
 				if (this.selectedMinute == a) timeSelect += '<option value="' + a + '" selected="selected">' +  ((a >= 10) ? a : ('0' + a)) + '</option>';
 				else timeSelect += '<option value="' + a + '">' +  ((a >= 10) ? a : ('0' + a)) + '</option>';
 			}
-			timeSelect +='</select>'+ this.timeSeparators[1] + ' <select id="calendar_second">';
-			for (var a = 0; a < 60; a++) {
-				if (this.selectedMinute == a) timeSelect += '<option value="' + a + '" selected="selected">' +  ((a >= 10) ? a : ('0' + a)) + '</option>';
-				else timeSelect += '<option value="' + a + '">' +  ((a >= 10) ? a : ('0' + a)) + '</option>';
-			}
 			timeSelect +='</select>';
 			
 			if (this.timeSeparators.length == 4) {
@@ -450,7 +445,7 @@ var popUpCal = {
 				popUpCal.selectedMinute = this.options[this.selectedIndex].value - 0;
 				popUpCal.adjustDate(); 
 				popUpCal.input.val(popUpCal.formatDate(popUpCal.selectedDay, popUpCal.selectedMonth, popUpCal.selectedYear, popUpCal.selectedHour, popUpCal.selectedMinute));
-			}).click(this.selectMonthYear);;
+			}).click(this.selectMonthYear);
 			$("#calendar_ampm").change(function() {		//change am/pm
 				popUpCal.selecting = false;
 				if (popUpCal.timeSeparators.length == 4) {
