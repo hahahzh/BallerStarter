@@ -96,7 +96,7 @@ public class Master extends Controller {
 	 * @param sessionID
 	 */
 	@Before(unless={"checkDigit","register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
-			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameList"},priority=1)
+			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameInfo"},priority=1)
 	public static void validateSessionID(@Required String z) {
 		
 		Session s = Session.find("bySessionID",z).first();
@@ -621,12 +621,7 @@ public class Master extends Controller {
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
 		}
-		
-		Session s = sessionCache.get();
-		if(s == null){
-			renderFail("error_session_expired");
-		}
-				
+						
 		Game g = Game.find("startDate > ?", DateUtil.intervalofDay(new Date(), 5)).first();
 		
 		JSONObject results = initResultJSON();
@@ -637,8 +632,10 @@ public class Master extends Controller {
 			results.put("logo", "/c/download?id=" + g.id + "&fileID=logo&entity=" + g.getClass().getName() + "&z=" + 1);
 			results.put("prize", g.prize);
 			results.put("schedule", g.schedule);
-			results.put("startDate", g.startDate);
-			results.put("endDate", g.endDate);
+			results.put("startDate", g.startDate==null?"":SDF_TO_DAY.format(g.startDate));
+			results.put("endDate", g.endDate==null?"":SDF_TO_DAY.format(g.endDate));
+			results.put("startSignUp", g.startSignUp==null?"":SDF_TO_DAY.format(g.startSignUp));
+			results.put("endSignUp", g.endSignUp==null?"":SDF_TO_DAY.format(g.endSignUp));
 			results.put("describtion", g.describtion);
 						
 			JSONArray teamlist = initResultJSONArray();
@@ -646,8 +643,8 @@ public class Master extends Controller {
 				JSONObject data = initResultJSON();
 				for(Team t:g.teams){
 					data.put("name", t.name);
-					data.put("number", t.logo);
-					data.put("captain", t.captain.name);
+					data.put("coach", t.coach==null?"":t.coach.name);
+					data.put("captain", t.captain==null?"":t.captain.name);
 					if(t.logo != null && t.logo.exists()){
 						data.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + 1);
 					}else{
@@ -658,23 +655,23 @@ public class Master extends Controller {
 			}
 			results.put("teamlist", teamlist);
 			
-			List<Result> rs = Result.find("byGame", g).fetch();
-			JSONArray resultlist = initResultJSONArray();
-			if(rs.size() > 0){
-				JSONObject data = initResultJSON();
-				for(Result r:rs){
-					data.put("round", r.round);
-					data.put("home_team", r.home_team);
-					data.put("visiting_team", r.visiting_team);
-					data.put("home_team_point", r.home_team_point);
-					data.put("visiting_team_point", r.visiting_team_point);
-					data.put("home_team_integral", r.home_team_integral);
-					data.put("visiting_team_integral", r.visiting_team_integral);
-					data.put("date", r.date);
-					resultlist.add(data);
-				}
-			}
-			results.put("resultlist", resultlist);
+//			List<Result> rs = Result.find("byGame", g).fetch();
+//			JSONArray resultlist = initResultJSONArray();
+//			if(rs.size() > 0){
+//				JSONObject data = initResultJSON();
+//				for(Result r:rs){
+//					data.put("round", r.round);
+//					data.put("home_team", r.home_team);
+//					data.put("visiting_team", r.visiting_team);
+//					data.put("home_team_point", r.home_team_point);
+//					data.put("visiting_team_point", r.visiting_team_point);
+//					data.put("home_team_integral", r.home_team_integral);
+//					data.put("visiting_team_integral", r.visiting_team_integral);
+//					data.put("date", r.date);
+//					resultlist.add(data);
+//				}
+//			}
+//			results.put("resultlist", resultlist);
 		}
 		renderSuccess(results);
 	}

@@ -26,6 +26,8 @@ public class Game extends Model {
 	public String schedule;
 	public Date startDate;
 	public Date endDate;
+	public Date startSignUp;
+	public Date endSignUp;
 	@MaxSize(1000)
 	public String prize;
 	@OneToMany(fetch=FetchType.LAZY)

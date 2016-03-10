@@ -521,6 +521,47 @@ function teamSubmit(){
 	sendRequest("/c/t/uti", "post", data, "text", "/public/html5/team/info_view.html", 3);
 }
 
+function loadInitGameData(){
+	var data = {
+        };
+	$.ajax({
+        url: "/c/g/ggi",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$("#v_img_g_logo").attr("src", obj.results.logo);
+        		$("#name").text(obj.results.name);
+        		$("#describtion").text(obj.results.describtion);
+        		$("#schedule").text(obj.results.schedule);
+        		$("#startSignUp").text(obj.results.startSignUp);
+        		$("#endSignUp").text(obj.results.endSignUp);
+        		$("#startDate").text(obj.results.startDate);
+        		$("#endDate").text(obj.results.endDate);
+        		str = "";
+        		alert(obj.results.logo)
+        		$.each(obj.results.teamlist, function(index, json) {
+        			str+="<tr><td>";
+        			str+="球队名称: "+json.name;
+        			str+="</br>";
+        			str+="教练: "+json.job1;
+        			str+="</br>";
+        			str+="队长: "+json.number+" 号";
+        			str+="</td>";
+        			str+="<td>";
+        			str+="<img src='"+json.logo+"'>";
+                	str+="</td></tr>";
+        		});
+        		$("#g_v_teams").append(str);
+        	}else{
+        		alert(obj.msg);
+        	}	
+        }
+    });
+}
+
 function setPData(xmlhttp){
 	if (xmlhttp.readyState==4 && xmlhttp.status==200){
 		var jsonData = eval("(" + xmlhttp.responseText + ")");
