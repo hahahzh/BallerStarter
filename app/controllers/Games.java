@@ -76,6 +76,12 @@ public class Games extends CRUD {
 	        if(params.get("object.endDate")!=null){
 	        	object.endDate = DateUtil.reverse2Date(params.get("object.endDate")+":00");
 	        }
+	        if(params.get("object.startSignUp")!=null){
+	        	object.startSignUp = DateUtil.reverse2Date(params.get("object.startSignUp")+":00");
+	        }
+	        if(params.get("object.endSignUp")!=null){
+	        	object.endSignUp = DateUtil.reverse2Date(params.get("object.endSignUp")+":00");
+	        }
 	        validation.valid(object);
 	        if (validation.hasErrors()) {
 	            renderArgs.put("error", play.i18n.Messages.get("crud.hasErrors"));

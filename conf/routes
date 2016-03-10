@@ -17,7 +17,9 @@ GET     /                                       Application.index
 *		/c/t/gti								Master.getPTeamInfo
 *		/c/t/uti								Master.updateTeamInfo
 *		/c/g/ggi								Master.getGameInfo
+*		/c/g/su									Master.signUp
 
+*       /c/download								Master.download
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

@@ -28,10 +28,10 @@ public class Game extends Model {
 	public Date endDate;
 	public Date startSignUp;
 	public Date endSignUp;
+	public Integer tCount;
+	public Boolean isShow;
 	@MaxSize(1000)
 	public String prize;
-	@OneToMany(fetch=FetchType.LAZY)
-	public List<Team> teams;
 	public String toString() {
 		return name;
 	}

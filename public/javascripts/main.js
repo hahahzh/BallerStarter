@@ -54,29 +54,6 @@ function SetRemainTime() {
 	}
 }
 
-var msgCount=3;
-function SetSMsg(code){
-	curCount = msgCount;
-	if('1' == code){
-		$("#gmsg").text("注册成功！");
-	}else if('2' == code){
-		$("#gmsg").text("请到注册邮箱查收新密码!");
-	}else if('3' == code){
-		$("#gmsg").text("修改成功!");
-	}
-	$("#gmsg").show();
-	InterValObj = window.setInterval(SetSMsgTime, 1000); //启动计时器，1秒执行一次
-}
-//timer处理函数
-function SetSMsgTime() {
-	if (curCount == 0) {                
-		window.clearInterval(InterValObj);//停止计时器
-		$("#gmsg").hide();    
-	} else {
-		curCount--;
-	}
-}
-
 function regSubmit() {
 	
 	var p = $("#phone").val();
@@ -146,11 +123,11 @@ function sendRequest(url, method, data, dataType, forword, successMsg){
         		if(obj.results.session != null && obj.results.session != ''){
         			sessionStorage.setItem("sessionID", obj.results.session);
         		}
-        		window.location = forword+"?successMsg="+successMsg;
+        		if(forword != null && forword != '')window.location = forword+"?successMsg="+successMsg;
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			window.location = "/public/html5/login.html";
+        			jumppage(11, 0);
         		}
         	}
         }
@@ -199,7 +176,7 @@ function loadInitPersonalData(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			window.location = "/public/html5/login.html";
+        			jumppage(11, 0);
         		}
         	}	
         }
@@ -253,7 +230,7 @@ function loadEditPersonalData(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			window.location = "/public/html5/login.html";
+        			jumppage(11, 0);
         		}
         	}	
         }
@@ -326,7 +303,7 @@ function loadEditPersonalImg(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			window.location = "/public/html5/login.html";
+        			jumppage(11, 0);
         		}
         	}
         }
@@ -382,35 +359,76 @@ function setPPFileUpload(){
     });
 }
 
-function jumppage(page){
+function jumppage(page, smsg){
+
+	var successMsg;
+	if(smsg != 0){
+		successMsg = "?successMsg="+smsg;
+	}
+	var loginpage = "/public/html5/login.html"+successMsg;;
+	var personalviewpage = "/public/html5/personal/info_view.html"+successMsg;
+	var personaleditpage = "/public/html5/personal/info_edit.html"+successMsg;
+	var personalportraitpage = "/public/html5/personal/info_edit_portrait.html"+successMsg;
+	var teamviewpage = "/public/html5/team/info_view.html"+successMsg;
+	var teameditpage = "/public/html5/team/info_edit.html"+successMsg;
+	var teamlogopage = "/public/html5/team/info_edit_logo.html"+successMsg;
+	var teamcoachpage = "/public/html5/team/info_edit_coach.html"+successMsg;
+	var teamcaptainpage = "/public/html5/team/info_edit_captain.html"+successMsg;
 	switch(page){
+	case 11:
+		window.location = loginpage;
+		break;
 	case 110:
-		window.location = "/public/html5/personal/info_view.html";
+		window.location = personalviewpage;
 		break;
 	case 111:
-		window.location = "/public/html5/personal/info_edit.html";
+		window.location = personaleditpage;
 		break;
 	case 112:
-		window.location = "/public/html5/personal/info_edit_portrait.html";
+		window.location = personalportraitpage;
 		break;
 	case 120:
-		window.location = "/public/html5/team/info_view.html";
+		window.location = teamviewpage;
 		break;
 	case 121:
-		window.location = "/public/html5/team/info_edit.html";
+		window.location = teameditpage;
 		break;
 	case 122:
-		window.location = "/public/html5/team/info_edit_logo.html";
+		window.location = teamlogopage;
 		break;
 	case 123:
-		window.location = "/public/html5/team/info_edit_coach.html";
+		window.location = teamcoachpage;
 		break;
 	case 124:
-		window.location = "/public/html5/team/info_edit_captain.html";
+		window.location = teamcaptainpage;
 		break;
 	default:
 	}
-	
+}
+
+var msgCount=3;
+function SetSMsg(code){
+	curCount = msgCount;
+	if('1' == code){
+		$("#gmsg").text("注册成功！");
+	}else if('2' == code){
+		$("#gmsg").text("请到注册邮箱查收新密码!");
+	}else if('3' == code){
+		$("#gmsg").text("修改成功!");
+	}else if('4' == code){
+		$("#gmsg").text("请先登录");
+	}
+	$("#gmsg").show();
+	InterValObj = window.setInterval(SetSMsgTime, 1000); //启动计时器，1秒执行一次
+}
+//timer处理函数
+function SetSMsgTime() {
+	if (curCount == 0) {                
+		window.clearInterval(InterValObj);//停止计时器
+		$("#gmsg").hide();    
+	} else {
+		curCount--;
+	}
 }
 
 function loadInitTeamData(){
@@ -455,7 +473,7 @@ function loadInitTeamData(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			window.location = "/public/html5/login.html";
+        			jumppage(11, 0);
         		}
         	}	
         }
@@ -502,7 +520,7 @@ function loadEditTeamData(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			window.location = "/public/html5/login.html";
+        			jumppage(11, 0);
         		}
         	}	
         }
@@ -532,6 +550,7 @@ function loadInitGameData(){
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
         	if(obj.state==1){
+        		$("#gId").val(obj.results.id);
         		$("#v_img_g_logo").attr("src", obj.results.logo);
         		$("#name").text(obj.results.name);
         		$("#describtion").text(obj.results.describtion);
@@ -540,15 +559,22 @@ function loadInitGameData(){
         		$("#endSignUp").text(obj.results.endSignUp);
         		$("#startDate").text(obj.results.startDate);
         		$("#endDate").text(obj.results.endDate);
+        		if(obj.results.isSignUp == 0){
+        			$("#b_g_signup").attr("disabled", true);
+        			$("#b_g_signup").text("报名结束");
+        		}else{
+        			$("#b_g_signup").attr("disabled", false);
+        			$("#b_g_signup").val("我要报名");
+        		}
+        		
         		str = "";
-        		alert(obj.results.logo)
         		$.each(obj.results.teamlist, function(index, json) {
         			str+="<tr><td>";
         			str+="球队名称: "+json.name;
         			str+="</br>";
-        			str+="教练: "+json.job1;
+        			str+="教练: "+json.coach;
         			str+="</br>";
-        			str+="队长: "+json.number+" 号";
+        			str+="队长: "+json.captain;
         			str+="</td>";
         			str+="<td>";
         			str+="<img src='"+json.logo+"'>";
@@ -560,6 +586,24 @@ function loadInitGameData(){
         	}	
         }
     });
+}
+
+function signup(){
+	if(sessionStorage.getItem("sessionID")==null||sessionStorage.getItem("sessionID")==''){
+		jumppage(11, 4);
+		return;
+	}
+	if(confirm("确认要报名吗?")){
+		var id = $("#gId").val();
+		var data = {
+	            gId:id,
+	            z:sessionStorage.getItem("sessionID")
+	        };
+		sendRequest("/c/g/su", "get", data, "text", "", 0);
+		alert("报名成功，请等待审核！");
+    }else{
+        return;
+    }
 }
 
 function setPData(xmlhttp){

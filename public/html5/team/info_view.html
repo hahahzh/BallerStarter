@@ -35,13 +35,11 @@
 <script type="text/javascript">
 $(document).ready(function() { 
 	
-	successMsg = GetQueryString("successMsg");
+	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
 		SetSMsg(successMsg);
-	}else{
-		$("#gmsg").hide();
 	}
-	}); 
+	});
 	
 </script>
   </head>

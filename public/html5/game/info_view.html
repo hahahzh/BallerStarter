@@ -35,11 +35,9 @@
 <script type="text/javascript">
 $(document).ready(function() { 
 	
-	successMsg = GetQueryString("successMsg");
+	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
 		SetSMsg(successMsg);
-	}else{
-		$("#gmsg").hide();
 	}
 	}); 
 	
@@ -55,11 +53,11 @@ $(document).ready(function() {
         
       </div>
 <div class="container theme-showcase" role="main">
-    
+<input type="hidden" id="gId"/>    
 <table class="table table-striped">
 <tr>
   <td>
-  <button type="button" onclick="" class="btn btn-default form-control" id="tEdit">我要报名</button>
+  <button type="button" onclick="signup();" class="btn btn-default form-control" id="b_g_signup">我要报名</button>
   </td>
   <td>
 	

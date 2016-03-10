@@ -351,9 +351,9 @@ public class DateUtil {
 	
 	public static void main(String[] args) {
 		try {
-			double a=DateUtil.intervalOfHour(new Date("2011/12/2 1:00:00"),new Date("2011/12/2 1:10:00"));
+			double a=DateUtil.intervalOfHour(new Date("2011/11/1 1:00:00"),new Date("2011/11/2 0:10:00"));
 			Date d = DateUtil.intervalofDay(new Date(), -5);
-			System.out.println(d);
+			System.out.println(a);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

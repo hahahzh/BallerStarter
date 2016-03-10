@@ -144,3 +144,6 @@ captain_img=队长照片
 captain=队长
 updated_at_ch=创建日期
 contact=联系方式
+startSignUp=报名开始日
+endSignUp=报名截止日
+tCount=参赛球队数

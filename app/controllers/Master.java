@@ -3,6 +3,7 @@ package controllers;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +18,7 @@ import models.Blood;
 import models.CheckDigit;
 import models.Constellation;
 import models.Game;
+import models.GameApproval;
 import models.Job;
 import models.Member;
 import models.MemberPoint;
@@ -32,6 +34,7 @@ import play.data.validation.Validation;
 import play.db.DB;
 import play.db.Model;
 import play.db.jpa.Blob;
+import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -615,14 +618,15 @@ public class Master extends Controller {
 	 * 获取赛事
 	 * 
 	 * @param z
+	 * @throws ParseException
 	 */
-	public static void getGameInfo() {
+	public static void getGameInfo() throws ParseException {
 		
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
 		}
 						
-		Game g = Game.find("startDate > ?", DateUtil.intervalofDay(new Date(), 5)).first();
+		Game g = Game.find("isShow =1 order by id desc").first();
 		
 		JSONObject results = initResultJSON();
 		
@@ -637,16 +641,22 @@ public class Master extends Controller {
 			results.put("startSignUp", g.startSignUp==null?"":SDF_TO_DAY.format(g.startSignUp));
 			results.put("endSignUp", g.endSignUp==null?"":SDF_TO_DAY.format(g.endSignUp));
 			results.put("describtion", g.describtion);
+			if(DateUtil.intervalOfHour(new Date(), g.endSignUp) > 0){
+				results.put("isSignUp", 1);
+			}else{
+				results.put("isSignUp", 0);
+			}
 						
 			JSONArray teamlist = initResultJSONArray();
-			if(g.teams != null && g.teams.size() > 0){
+			List<GameApproval> gas = GameApproval.find("games_id=? and isAppr=1", g.id).fetch();
+			if(gas != null && gas.size() > 0){
 				JSONObject data = initResultJSON();
-				for(Team t:g.teams){
-					data.put("name", t.name);
-					data.put("coach", t.coach==null?"":t.coach.name);
-					data.put("captain", t.captain==null?"":t.captain.name);
-					if(t.logo != null && t.logo.exists()){
-						data.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + 1);
+				for(GameApproval ga:gas){
+					data.put("name", ga.teams.name);
+					data.put("coach", ga.teams.coach==null?"":ga.teams.coach.name);
+					data.put("captain", ga.teams.captain==null?"":ga.teams.captain.name);
+					if(ga.teams.logo != null && ga.teams.logo.exists()){
+						data.put("logo", "/c/download?id=" + ga.teams.id + "&fileID=logo&entity=" + ga.teams.getClass().getName() + "&z=" + 1);
 					}else{
 						data.put("logo", TLOGO);
 					}
@@ -681,7 +691,7 @@ public class Master extends Controller {
 	 * 
 	 * @param z
 	 */
-	public static void signUp(@Required Long tId, @Required Long gId, @Required String z) {
+	public static void signUp(@Required Long gId, @Required String z) {
 		
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
@@ -693,11 +703,17 @@ public class Master extends Controller {
 		}
 				
 		Game g = Game.findById(gId);
-		Team t = Team.findById(tId);
-		if(g.teams != null && g.teams.contains(t)){
+		Team t = Team.find("coach_id=? or captain_id=?",s.member.id, s.member.id).first();
+		GameApproval ga = GameApproval.find("games_id=? and teams_id=?", g.id,t.id).first();
+		if(ga == null){
+			ga = new GameApproval();
+			ga.games = g;
+			ga.teams = t;
+			ga.isAppr = false;
+			ga._save();
+		}else{
 			renderFail("error_team_su_exist");
 		}
-		g.teams.add(t);
 		renderSuccess(initResultJSON());
 	}
 	
