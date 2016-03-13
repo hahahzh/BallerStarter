@@ -29,10 +29,8 @@ public class Team extends Model {
 	@MaxSize(20)
 	@Unique
 	public String name;
-	public Blob coach_img;
 	@OneToOne(optional = false, cascade = { CascadeType.REFRESH},fetch=FetchType.EAGER)
 	public Member coach;
-	public Blob captain_img;
 	@OneToOne(optional = false, cascade = { CascadeType.REFRESH},fetch=FetchType.EAGER)
 	public Member captain;
 	@MaxSize(50)

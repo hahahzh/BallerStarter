@@ -33,7 +33,7 @@
     <script src="/public/javascripts/main.js"></script>
 <script type="text/javascript">
 $(document).ready(function() { 
-	
+	successMsg = GetQueryString("successMsg");
 	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
 		SetSMsg(successMsg);
@@ -66,7 +66,7 @@ $(document).ready(function() {
 <tr>
   <td style="width: 50%;">头像</td>
   <td>
-  <img src="/public/images/girl.jpg" name=v_img_ch id="v_img_ch" >
+  <img src="/public/images/boy.jpg" name=v_img_ch id="v_img_ch" >
   </td>
 </tr>
 <tr>

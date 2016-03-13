@@ -34,9 +34,10 @@
 
 <script type="text/javascript">
 $(document).ready(function() { 
-	
+	successMsg = GetQueryString("successMsg");
 	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
+		
 		SetSMsg(successMsg);
 	}
 	}); 
@@ -83,7 +84,8 @@ $(document).ready(function() {
 <tr>
   <td>比赛日程</td>
   <td>
- 	<label for="exampleInputName2" id="schedule"></label>
+ 	<!-- <label for="exampleInputName2" id="schedule"></label> -->
+ 	<a href="#" id="a_g_schedule" target="_blank">查看赛程</a>
   </td>
 </tr>
 <tr>
@@ -109,6 +111,13 @@ $(document).ready(function() {
   <td>
  	<label for="exampleInputName2" id="endDate"></label>
   </td>
+</tr>
+</table>
+<!-- 比赛结果 -->
+<table class="table table-striped" id="g_v_teams">
+<tr>
+  <td><a href="#" id="a_g_standings" target="_blank">排名</a></td>
+  <td><a href="#" id="a_g_results" target="_blank">赛果</a></td>
 </tr>
 </table>
 <!-- 球队信息 -->

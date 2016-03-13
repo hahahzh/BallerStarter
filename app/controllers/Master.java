@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +26,7 @@ import models.Member;
 import models.MemberPoint;
 import models.Result;
 import models.Session;
+import models.Standing;
 import models.Team;
 import models.TempFile;
 import net.sf.json.JSONArray;
@@ -34,7 +37,7 @@ import play.data.validation.Validation;
 import play.db.DB;
 import play.db.Model;
 import play.db.jpa.Blob;
-import play.db.jpa.JPA;
+import play.db.jpa.GenericModel.JPAQuery;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -56,6 +59,8 @@ public class Master extends Controller {
 	public static final SimpleDateFormat SDF_TO_S = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public static final SimpleDateFormat SDF_TO_DAY = new SimpleDateFormat("yyyy-MM-dd");
 	public static final String TLOGO = "/public/images/tlogo.jpg";
+	public static final String BOY = "/public/images/boy.jpg";
+	public static final String GIRL = "/public/images/girl.jpg";
 
 	// 定义返回Code
 	public static final String SUCCESS = "1";//成功
@@ -99,7 +104,8 @@ public class Master extends Controller {
 	 * @param sessionID
 	 */
 	@Before(unless={"checkDigit","register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
-			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameInfo"},priority=1)
+			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameInfo",
+			"getGameStandingsData","getGameResultsData"},priority=1)
 	public static void validateSessionID(@Required String z) {
 		
 		Session s = Session.find("bySessionID",z).first();
@@ -270,31 +276,6 @@ public class Master extends Controller {
 		m.save();
 		renderSuccess(initResultJSON());
 	}
-
-	public static void getMemberImg(@Required String z) {
-		if (Validation.hasErrors()) {
-			renderFail("error_parameter_required");
-		}
-		
-		Session s = sessionCache.get();
-		if(s == null){
-			renderFail("error_session_expired");
-		}
-		Member m = s.member;
-		JSONObject results = initResultJSON();
-	
-		if(m.img_ch != null && m.img_ch.exists()){
-			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
-		}else{
-			if(m.gender == null){
-				results.put("img_ch", "/public/images/boy.jpg");
-			}else{
-				results.put("img_ch", "/public/images/girl.jpg");
-			}
-		}
-
-		renderSuccess(results);
-	}
 	
 	/**
 	 * 获取用户信息
@@ -317,7 +298,7 @@ public class Master extends Controller {
 	
 		results.put("name", m.name);
 		results.put("nickname", m.nickname);
-		results.put("birthday", SDF_TO_DAY.format(m.birthday));
+		results.put("birthday", m.birthday==null?"":SDF_TO_DAY.format(m.birthday));
 		results.put("gender", m.gender);
 		results.put("nationality", m.nationality);
 		results.put("region", m.region);
@@ -332,12 +313,12 @@ public class Master extends Controller {
 			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
 		}else{
 			if(m.gender == null){
-				results.put("img_ch", "/public/images/boy.jpg");
+				results.put("img_ch", BOY);
 			}else{
-				results.put("img_ch", "/public/images/girl.jpg");
+				results.put("img_ch", GIRL);
 			}
 		}
-		results.put("auth", m.isAuth==1?"是":"否");
+		results.put("auth", m.isAuth);
 		results.put("qq", m.qq);
 		results.put("email", m.email);
 		results.put("phone", m.phone);
@@ -386,8 +367,7 @@ public class Master extends Controller {
 	 * 更新球队信息
 	 * 
 	 */
-	public static void updateTeamInfo(Blob logo, String name, Blob coach_img, String coach, 
-			Blob captain_img, String captain, String contact, String members, @Required String z) {
+	public static void updateTeamInfo(Blob logo, String name, String coach, String captain, String contact, String members, @Required String z) {
 
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
@@ -411,20 +391,8 @@ public class Master extends Controller {
 			if(!StringUtil.isEmpty(name)){
 				t.name = name;
 			}
-			if(coach_img != null){
-				if(t.coach_img.exists()){
-					t.coach_img.getFile().delete();
-				}
-				t.coach_img = coach_img;
-			}
 			if(!StringUtil.isEmpty(coach)){
 				t.coach = Member.find("byName", coach).first();
-			}
-			if(captain_img != null){
-				if(t.captain_img.exists()){
-					t.captain_img.getFile().delete();
-				}
-				t.captain_img = coach_img;
 			}
 			if(!StringUtil.isEmpty(captain)){
 				t.captain = Member.find("byName", captain).first();
@@ -432,18 +400,18 @@ public class Master extends Controller {
 			if(!StringUtil.isEmpty(contact)){
 				t.contact = contact;
 			}
-			members = "12,13,14,15,16,17,";
-			if(!StringUtil.isEmpty(members)){
-				String[] ma = members.split(",");
-				int count = 0;
-				for(String ms:ma){
-					if(count > 11)break;
-					Member m = Member.findById(Long.parseLong(ms));
-					if(m != null)t.members.add(m);
-					count++;
-				}
-				t.members = StringUtil.removalDup(t.members);
-			}
+//			members = "12,13,14,15,16,17,";
+//			if(!StringUtil.isEmpty(members)){
+//				String[] ma = members.split(",");
+//				int count = 0;
+//				for(String ms:ma){
+//					if(count > 11)break;
+//					Member m = Member.findById(Long.parseLong(ms));
+//					if(m != null)t.members.add(m);
+//					count++;
+//				}
+//				t.members = StringUtil.removalDup(t.members);
+//			}
 			t.save();
 		}
 		renderSuccess(initResultJSON());
@@ -476,12 +444,12 @@ public class Master extends Controller {
 			results.put("logo", TLOGO);
 		}
 		results.put("name", t.name);
-		if(t.coach_img != null && t.coach_img.exists()){
-			results.put("coach_img", "/c/download?id=" + t.id + "&fileID=coach_img&entity=" + t.getClass().getName() + "&z=" + z);
+		if(t.coach.img_ch != null && t.coach.img_ch.exists()){
+			results.put("coach_img", "/c/download?id=" + t.coach.id + "&fileID=img_ch&entity=" + t.coach.getClass().getName() + "&z=" + z);
 		}
 		results.put("coach", t.coach==null?"":t.coach.name);
-		if(t.captain_img != null && t.captain_img.exists()){
-			results.put("captain_img", "/c/download?id=" + t.id + "&fileID=captain_img&entity=" + t.getClass().getName() + "&z=" + z);
+		if(t.captain.img_ch != null && t.captain.img_ch.exists()){
+			results.put("captain_img", "/c/download?id=" + t.captain.id + "&fileID=img_ch&entity=" + t.captain.getClass().getName() + "&z=" + z);
 		}
 		results.put("captain", t.captain==null?"":t.captain.name);
 		results.put("contact", t.contact);
@@ -498,7 +466,7 @@ public class Master extends Controller {
 				if(m.img_ch != null && m.img_ch.exists()){
 					data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
 				}else{
-					data.put("img_ch", "/public/images/boy.jpg");
+					data.put("img_ch", BOY);
 				}
 				datalist.add(data);
 			}
@@ -635,7 +603,10 @@ public class Master extends Controller {
 			results.put("name", g.name);
 			results.put("logo", "/c/download?id=" + g.id + "&fileID=logo&entity=" + g.getClass().getName() + "&z=" + 1);
 			results.put("prize", g.prize);
-			results.put("schedule", g.schedule);
+//			results.put("schedule", g.schedule);
+			if(g.schedule != null && g.schedule.exists()){
+				results.put("schedule", "/c/download?id=" + g.id + "&fileID=schedule&entity=" + g.getClass().getName() + "&z=" + 1);
+			}
 			results.put("startDate", g.startDate==null?"":SDF_TO_DAY.format(g.startDate));
 			results.put("endDate", g.endDate==null?"":SDF_TO_DAY.format(g.endDate));
 			results.put("startSignUp", g.startSignUp==null?"":SDF_TO_DAY.format(g.startSignUp));
@@ -718,36 +689,125 @@ public class Master extends Controller {
 	}
 	
 	/**
-	 * 头像
+	 * 获取赛事排名
 	 * 
-	 * @param sn
-	 * @param rId
-	 * @param z
 	 */
-	public static void getMemberPortrait(@Required String z) {
+	public static void getGameStandingsData(@Required Long gId) {
 		
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
 		}
 		
-		Member m = null;
-		JSONObject results = initResultJSON();
-		if(m.img_ch != null && m.img_ch.exists()){
-			if(StringUtil.isEmpty(z))z = ((Session)Session.find("byC", m.img_ch).first()).sessionID;
-			results.put("portrait", "/c/download?id=" + m.id + "&fileID=portrait&entity=" + m.getClass().getName() + "&z=" + z);
-		}else{
-			results.put("portrait", "/public/images/boy.jpg");
+		List<Result> rs = Result.find("game_id=? and gameType=1", gId).fetch();
+		List<GameApproval> gas = GameApproval.find("games_id=? and isAppr=1", gId).fetch();
+		List<Standing> ss1 = new ArrayList<Standing>();
+		
+		for(GameApproval ga:gas){
+			Standing tmpS = new Standing();
+			tmpS.name = ga.teams.name;
+			tmpS.id = ga.teams.id;
+			tmpS.round = 0;
+			tmpS.win = 0;
+			tmpS.lose = 0;
+			for(Result r:rs){
+				if(ga.teams.id == r.home_team.id){
+					tmpS.round++;
+					if(r.home_team_integral > 0)
+						tmpS.win++;
+					else
+						tmpS.lose++;
+				}
+			}
+			ss1.add(tmpS);
 		}
+		List<Standing> ss2 = new ArrayList<Standing>();
+		for(GameApproval ga:gas){
+			Standing tmpS = new Standing();
+			tmpS.name = ga.teams.name;
+			tmpS.id = ga.teams.id;
+			tmpS.round = 0;
+			tmpS.win = 0;
+			tmpS.lose = 0;
+			for(Result r:rs){
+				if(ga.teams.id == r.visiting_team.id){
+					tmpS.round++;
+					if(r.visiting_team_integral > 0)
+						tmpS.win++;
+					else
+						tmpS.lose++;
+				}
+			}
+			ss2.add(tmpS);
+		}
+		List<Standing> resultsS = new ArrayList<Standing>();
+		for(Standing s1:ss1){
+			for(Standing s2:ss2){
+				if(s1.id == s2.id){
+					s1.round += s2.round;
+					s1.win += s2.win;
+					s1.lose += s2.lose;
+					break;
+				}
+			}
+			if(s1.win+s1.lose>0){
+				float win = s1.win;
+				float total = s1.win+s1.lose;
+				s1.rate = win/total;
+			}else{
+				s1.rate = 0F;
+			}
+			resultsS.add(s1);
+		}
+		Collections.sort(resultsS, new Comparator<Standing>() {
+	        public int compare(Standing arg0, Standing arg1) {
+	            return arg0.rate.compareTo(arg1.rate);
+	        }
+	    });
+		Collections.reverse(resultsS);
+		JSONObject results = initResultJSON();
+		JSONArray datalist = initResultJSONArray();
+		int n = 1;
+		results.put("game", gas.get(0).games.name);
+		for(Standing r:resultsS){
+			JSONObject data = initResultJSON();
+			data.put("standing", n++);
+			data.put("name", r.name);
+			data.put("round", r.round);
+			data.put("win", r.win);
+			data.put("lose", r.lose);
+			data.put("rate", (r.rate*100)+"%");
+			datalist.add(data);
+		}
+		results.put("datalist", datalist);
 		renderSuccess(results);
 	}
-	
-	
-	
 
-	
-	
-
-
+	/**
+	 * 获取赛事排名
+	 * 
+	 */
+	public static void getGameResultsData(@Required Long gId) {
+		
+		if (Validation.hasErrors()) {
+			renderFail("error_parameter_required");
+		}
+		
+		List<Result> rs = Result.find("game_id=? and gameType=1", gId).fetch();
+		JSONObject results = initResultJSON();
+		JSONArray datalist = initResultJSONArray();
+		results.put("game", rs.get(0).game.name);
+		for(Result r:rs){
+			JSONObject data = initResultJSON();
+			data.put("ruond", r.round);
+			data.put("name", r.home_team.name+" VS "+r.visiting_team.name);
+			data.put("point", r.home_team_point+" : "+r.visiting_team_point);
+			data.put("type", r.gameType.name);
+			data.put("date", r.date);
+			datalist.add(data);
+		}
+		results.put("datalist", datalist);
+		renderSuccess(results);
+	}
 	
 	
 	public static void insertSN(@Required String username, @Required String pwd, @Required String from,@Required String to) {
@@ -791,15 +851,62 @@ public class Master extends Controller {
 		}
 	}
 	
-	public static void saveTempFile(@Required Blob f, @Required String z){
+	public static void saveTempFile(Blob f_edit_img, Integer rs, Integer sType, Long tfId, @Required String z){
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
 		}
-		TempFile tf = new TempFile();
-		tf.tempFile = f;
-		tf.save();
 		JSONObject results = initResultJSON();
-		results.put("tf", "/c/download?id=" + tf.id + "&fileID=tempFile&entity=" + tf.getClass().getName() + "&z=" + z);
+		if(sType == null || sType == 0){
+			if(f_edit_img == null){
+				if(rs!=null){
+					Session s = sessionCache.get();
+					if(rs == 111){
+						if(s.member.img_ch != null && s.member.img_ch.exists()){
+							results.put("tf", "/c/download?id=" + s.member.id + "&fileID=img_ch&entity=" + s.member.getClass().getName() + "&z=" + z);
+						}
+					}else if(rs == 113){
+						if(s.member.identification != null && s.member.identification.exists()){
+							results.put("tf", "/c/download?id=" + s.member.id + "&fileID=identification&entity=" + s.member.getClass().getName() + "&z=" + z);
+						}
+					}else if(rs == 121){
+						Team t = Team.find("coach_id=? or captain_id=?", s.member.id, s.member.id).first();
+						if(t != null && t.logo != null && t.logo.exists()){
+							results.put("tf", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + z);
+						}
+					}
+				}
+				
+				if(!results.containsKey("tf"))results.put("tf", BOY);
+			}else{
+				TempFile tf = new TempFile();
+				tf.tempFile = f_edit_img;
+				tf.save();
+				results.put("tfId", tf.id);
+				results.put("tf", "/c/download?id=" + tf.id + "&fileID=tempFile&entity=" + tf.getClass().getName() + "&z=" + z);
+			}
+		}else{
+			Session s = sessionCache.get();
+			if(tfId != null){
+				TempFile tf = TempFile.findById(tfId);
+				if(rs == 111){
+					s.member.img_ch = tf.tempFile;
+					s.member._save();
+				}else if(rs == 113){
+					s.member.identification = tf.tempFile;
+					s.member._save();
+				}else if(rs == 121){
+					Team t = Team.find("coach_id=? or captain_id=?", s.member.id, s.member.id).first();
+					if(t == null){
+						t = new Team();
+						t.updated_at_ch = new Date();
+						t.captain = s.member;
+						t.coach = s.member;
+					}
+					t.logo = tf.tempFile;
+					t._save();
+				}	
+			}
+		}
 		renderSuccess(results);
 	}
 	

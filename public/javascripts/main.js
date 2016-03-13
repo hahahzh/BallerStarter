@@ -144,6 +144,7 @@ function loadInitPersonalData(){
 	var data = {
             z:sessionStorage.getItem("sessionID")
         };
+	
 	$.ajax({
         url: "/c/p/gmi",
         type: "get",
@@ -166,7 +167,11 @@ function loadInitPersonalData(){
         		$("#job1").text(obj.results.job1);
         		$("#job2").text(obj.results.job2);
         		$("#specialty").text(obj.results.specialty);
-        		$("#auth").text(obj.results.auth);
+        		if(obj.results.auth==1){
+        			$("#auth").text("是");
+        		}else{
+        			$("#auth").text("否");
+        		}
         		$("#qq").text(obj.results.qq);
         		$("#email").text(obj.results.email);
         		$("#weixin").text(obj.results.weixin);
@@ -188,6 +193,7 @@ function loadEditPersonalData(){
 	var data = {
             z:sessionStorage.getItem("sessionID")
         };
+	
 	$.ajax({
         url: "/c/p/gmi",
         type: "get",
@@ -217,6 +223,11 @@ function loadEditPersonalData(){
         		$("#job2").val(obj.results.job2);
         		$("#specialty").val(obj.results.specialty);
         		$("#auth").val(obj.results.auth);
+        		if(obj.results.auth == 0){
+        			$("#r_identification").show();
+        		}else{
+        			$("#r_identification").hide();
+        		}
         		$("#qq").val(obj.results.qq);
         		$("#email").val(obj.results.email);
         		$("#weixin").val(obj.results.weixin);
@@ -287,29 +298,6 @@ function loadEditPersonalData(){
     });
 }
 
-function loadEditPersonalImg(){
-	var data = {
-            z:sessionStorage.getItem("sessionID")
-        };
-	$.ajax({
-        url: "/c/p/gmii",
-        type: "get",
-        data: data,
-        dataType: "text",
-        success:function(msg){
-        	var obj = jQuery.parseJSON(msg);
-        	if(obj.state==1){
-        		$("#v_img_ch").attr("src", obj.results.img_ch);
-        	}else{
-        		alert(obj.msg);
-        		if(obj.msg == 'session_expired'){
-        			jumppage(11, 0);
-        		}
-        	}
-        }
-    });
-}
-
 function personalSubmit(){
 //	$("#img_ch").attr();
 
@@ -340,28 +328,11 @@ function personalSubmit(){
 	sendRequest("/c/p/umi", "post", data, "text", "/public/html5/personal/info_view.html", 3);
 }
 
-function setPPFileUpload(){
-	$('#img_ch').click();
-	var data = {
-			z:sessionStorage.getItem("sessionID")
-	};
-	$.ajax({
-        url: "/c/p/gmd",
-        type: "post",
-        data: data,
-        dataType: "text",
-        success:function(msg){
-        	var obj = jQuery.parseJSON(msg);
-        	if(obj.state==1){
-        		$('#v_img_ch').attr("src", obj.results.tf);
-        	}
-        }
-    });
-}
+
 
 function jumppage(page, smsg){
 
-	var successMsg;
+	var successMsg="";
 	if(smsg != 0){
 		successMsg = "?successMsg="+smsg;
 	}
@@ -374,6 +345,7 @@ function jumppage(page, smsg){
 	var teamlogopage = "/public/html5/team/info_edit_logo.html"+successMsg;
 	var teamcoachpage = "/public/html5/team/info_edit_coach.html"+successMsg;
 	var teamcaptainpage = "/public/html5/team/info_edit_captain.html"+successMsg;
+	var gameviewpage = "/public/html5/game/info_view.html"+successMsg;
 	switch(page){
 	case 11:
 		window.location = loginpage;
@@ -386,6 +358,9 @@ function jumppage(page, smsg){
 		break;
 	case 112:
 		window.location = personalportraitpage;
+		break;
+	case 113:
+		window.location = personaleditpage;
 		break;
 	case 120:
 		window.location = teamviewpage;
@@ -402,6 +377,9 @@ function jumppage(page, smsg){
 	case 124:
 		window.location = teamcaptainpage;
 		break;
+	case 130:
+		window.location = gameviewpage;
+		break;
 	default:
 	}
 }
@@ -417,6 +395,8 @@ function SetSMsg(code){
 		$("#gmsg").text("修改成功!");
 	}else if('4' == code){
 		$("#gmsg").text("请先登录");
+	}else if('5' == code){
+		$("#gmsg").text("报名成功,请等待审核！");
 	}
 	$("#gmsg").show();
 	InterValObj = window.setInterval(SetSMsgTime, 1000); //启动计时器，1秒执行一次
@@ -554,7 +534,8 @@ function loadInitGameData(){
         		$("#v_img_g_logo").attr("src", obj.results.logo);
         		$("#name").text(obj.results.name);
         		$("#describtion").text(obj.results.describtion);
-        		$("#schedule").text(obj.results.schedule);
+        		//$("#schedule").text(obj.results.schedule);
+        		$("#a_g_schedule").attr("href", obj.results.schedule);
         		$("#startSignUp").text(obj.results.startSignUp);
         		$("#endSignUp").text(obj.results.endSignUp);
         		$("#startDate").text(obj.results.startDate);
@@ -566,7 +547,8 @@ function loadInitGameData(){
         			$("#b_g_signup").attr("disabled", false);
         			$("#b_g_signup").val("我要报名");
         		}
-        		
+        		$("#a_g_standings").attr("href", "/public/html5/game/standings.html?gid="+obj.results.id);
+        		$("#a_g_results").attr("href", "/public/html5/game/results.html?gid="+obj.results.id);
         		str = "";
         		$.each(obj.results.teamlist, function(index, json) {
         			str+="<tr><td>";
@@ -599,11 +581,170 @@ function signup(){
 	            gId:id,
 	            z:sessionStorage.getItem("sessionID")
 	        };
-		sendRequest("/c/g/su", "get", data, "text", "", 0);
-		alert("报名成功，请等待审核！");
+		sendRequest("/c/g/su", "get", data, "text", "/public/html5/game/info_view.html", 5);
     }else{
         return;
     }
+}
+
+function loadGameStandingsData(){
+
+	var gId = GetQueryString("gid");
+	var data = {
+            gId:gId
+        };
+	$.ajax({
+        url: "/c/g/ggsd",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$("#v_s_t_name").text(obj.results.game);
+        		str = "";
+        		$.each(obj.results.datalist, function(index, json) {
+        			str+="<tr><td>";
+        			str+=json.standing;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.name;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.round;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.win;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.lose;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.rate;
+        			str+="</td>";
+                	str+="</td></tr>";
+        		});
+        		$("#g_v_standings").append(str);
+        	}else{
+        		alert(obj.msg);
+        	}	
+        }
+    });
+}
+
+function loadGameResultsData(){
+	
+	var gId = GetQueryString("gid");
+	var data = {
+            gId:gId
+        };
+	$.ajax({
+        url: "/c/g/ggrd",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		$("#v_r_t_name").text(obj.results.game);
+        		str = "";
+        		$.each(obj.results.datalist, function(index, json) {
+        			str+="<tr><td>";
+        			str+=json.ruond;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.name;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.point;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.type;
+        			str+="</td>";
+        			str+="<td>";
+        			str+=json.date;
+                	str+="</td></tr>";
+        		});
+        		$("#g_v_results").append(str);
+        	}else{
+        		alert(obj.msg);
+        	}	
+        }
+    });
+}
+
+function setPPFileUpload(){
+	$('#f_edit_img').click();
+}
+
+function ajaxFileUpload() {
+	var rs = GetQueryString("rs");
+	var tfId = $("#h_s_tfId").val()
+	var data = {
+			rs:rs,
+			sType:'0',
+			tfId:tfId,
+            z:sessionStorage.getItem("sessionID")
+        };
+	
+    $.ajaxFileUpload({
+            url: '/c/stf',
+            secureuri: false,
+            fileElementId: 'f_edit_img',
+            data: data,
+            dataType: 'text',
+            success: function (data, status) {
+            	var reg = /<pre.+?>(.+)<\/pre>/g;  
+            	var result = data.match(reg);
+            	data = RegExp.$1;
+            	var obj = jQuery.parseJSON(data);
+            	if(obj.state==1){
+            		var t = obj.results.tf.replace(/&amp;/g,'&');
+            		$("#h_s_tfId").val(obj.results.tfId);
+            		$("#c_edit_img").attr("src", t);
+            	}else{
+            		alert(obj.msg);
+            	}
+            }
+        });
+    return false;
+}
+
+function setImg(resource){
+	var saveimgpage = "/public/html5/save_img.html?rs="+resource;
+	window.location = saveimgpage;
+}
+
+function saveImg(){
+	
+	var rs = Number(GetQueryString("rs"));
+	var tfId = $("#h_s_tfId").val()
+	var data = {
+			rs:rs,
+			sType:'1',
+			tfId:tfId,
+            z:sessionStorage.getItem("sessionID")
+        };
+	
+    $.ajaxFileUpload({
+            url: '/c/stf',
+            secureuri: false,
+            fileElementId: 'f_edit_img',
+            data: data,
+            dataType: 'text',
+            success: function (data, status) {
+            	var reg = /<pre.+?>(.+)<\/pre>/g;  
+            	var result = data.match(reg);
+            	data = RegExp.$1;
+            	var obj = jQuery.parseJSON(data);
+            	if(obj.state==1){
+            		jumppage(rs, 0);
+            	}else{
+            		alert(obj.msg);
+            	}
+            }
+        });
+    return false;
 }
 
 function setPData(xmlhttp){

@@ -7,12 +7,12 @@ import play.data.validation.MaxSize;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
-@Table(name = "bloods")
+@Table(name = "game_type")
 @Entity
-public class Blood extends Model {
+public class GameType extends Model {
 
 	@Required
-	@MaxSize(6)
+	@MaxSize(4)
 	public String name;
 
 	

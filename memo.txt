@@ -25,6 +25,16 @@ mstsc -v demo.ballerstarter.com
 用户名: fsba
 密码:fsba-304
 
+主机：demo.ballerstarter.com
+用户名: fsba
+密码:fsba-304
+
+MySQL
+demo.ballerstarter.com
+root 
+fsba111111
+
+
 https://github.comhahahzhBallerStarter.git
 
 .;C:\Java\jdk\lib\tools.jar;C:\Java\jdk\lib\dt.jar
@@ -41,16 +51,19 @@ base
 10 reg
 11 login
 12 forget_pwd
+13 save_img
 personal
 110 info_view
 111 info_edit
-112 info_edit_portrait
-113 info_point
+112 info_point
+113 info_auth
 team
 120 info_view
 121 info_edit
 122 info_point
 game
-130
+130 info_view
+131 standings
+132 results
 news
 140

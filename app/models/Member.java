@@ -52,7 +52,7 @@ public class Member extends Model {
 	public String specialty;
 	public Blob img_ch;
 	public Blob identification;
-	public byte isAuth;
+	public Boolean isAuth;
 	@MaxSize(20)
 	public String qq;
 	@MaxSize(20)

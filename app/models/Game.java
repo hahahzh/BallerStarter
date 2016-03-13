@@ -23,7 +23,8 @@ public class Game extends Model {
 	public String name;
 	@MaxSize(2000)
 	public String describtion;
-	public String schedule;
+//	public String schedule;
+	public Blob schedule;
 	public Date startDate;
 	public Date endDate;
 	public Date startSignUp;

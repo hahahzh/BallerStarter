@@ -32,39 +32,28 @@
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="/public/javascripts/main.js"></script>
 
-
+<script type="text/javascript">
+</script>
   </head>
-  <body role="document" onload="loadEditPersonalImg();">
+  <body role="document" onload="loadGameStandingsData();">
 
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse text-center" style="background-color:#EE8A47;height:5px;">
-          <h5>个人信息 编辑 头像</h5>
+          <h5>赛事排名</h5>
     </nav>
 
 <div class="container theme-showcase" role="main">
-
-	<form method="post" class="form-inline">
-    
-<table class="table table-striped">
+<h1 id="v_s_t_name">赛事名称</h1>
+<table class="table table-striped" id="g_v_standings">
 <tr>
-  <td>
-  <button type="button" onclick="jumppage(111);" class="btn btn-default form-control">取消</button>
-  </td>
-</tr>
-<tr>
-  <td>
-  <img src="/public/images/girl.jpg" name=v_img_ch id="v_img_ch" onclick="setPPFileUpload();">
-  <input id="img_ch" type="file" accept="image/png,image/gif,image/jpeg" style="display: none" name="img_ch" />
-  </td>
-</tr>
-<tr>
-  <td>
-	<button type="button" onclick="savePPImg();" class="btn btn-default form-control" id="pSubmit">提交</button>
-  </td>
+  <td>排名</td>
+  <td>球队</td>
+  <td>场数</td>
+  <td>胜场</td>
+  <td>败场</td>
+  <td>胜率</td>
 </tr>
 </table>
-</form>
-
 </div>
 </body>
 </html>

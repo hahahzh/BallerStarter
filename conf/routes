@@ -18,6 +18,8 @@ GET     /                                       Application.index
 *		/c/t/uti								Master.updateTeamInfo
 *		/c/g/ggi								Master.getGameInfo
 *		/c/g/su									Master.signUp
+*		/c/g/ggsd								Master.getGameStandingsData
+*		/c/g/ggrd								Master.getGameResultsData
 
 *       /c/download								Master.download
 

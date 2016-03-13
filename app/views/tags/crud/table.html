@@ -62,7 +62,14 @@
                                 
                              %{ } }%
                         %{ } else { }%
-                            ${object[field]?.escape()?.raw()}
+                        	%{ if(object[field] == true) { }%	
+                            	ÊÇ
+                            %{ } else if (object[field] == false){ }%
+                            	·ñ
+                            %{ } else { }%
+                            	${object[field]?.escape()?.raw()}
+                            %{ } }%
+                            
                         %{ } }%
                     %{ } }%
                 %{ } }%
