@@ -77,7 +77,7 @@ function regSubmit() {
             pwd:pwd
         };
 	
-	sendRequest("/c/r", "post", data, "text", "/public/html5/login.html", 1);
+	sendRequest("/c/r", "post", data, "text", 11, 1, 0);
 }
 
 function forgetPWDSubmit() {
@@ -90,12 +90,15 @@ function forgetPWDSubmit() {
 	var data = {
             p:n
         };
-	sendRequest("/c/fps", "post", data, "text", "/public/html5/login.html", 2);
+	sendRequest("/c/fps", "post", data, "text", 11, 2, 0);
 }
 
 function loginSubmit() {
 	var n = $("#name").val();
 	var pwd = $("#pwd").val();
+	var repage = GetQueryString("repage");
+	if(repage == null)repage = 111;
+	else repage = Number(repage);
 	if(n == null || n == ''){
 		alert("用户名不能为空");
 		return;
@@ -108,10 +111,10 @@ function loginSubmit() {
             name:n,
             pwd:pwd
         };
-	sendRequest("/c/l", "post", data, "text", "/public/html5/personal/info_view.html", 0);
+	sendRequest("/c/l", "post", data, "text", repage, 0, 0);
 }
 
-function sendRequest(url, method, data, dataType, forword, successMsg){
+function sendRequest(url, method, data, dataType, forword, successMsg, repage){
 	$.ajax({
         url: url,
         type: method,
@@ -123,11 +126,13 @@ function sendRequest(url, method, data, dataType, forword, successMsg){
         		if(obj.results.session != null && obj.results.session != ''){
         			sessionStorage.setItem("sessionID", obj.results.session);
         		}
-        		if(forword != null && forword != '')window.location = forword+"?successMsg="+successMsg;
+        		if(forword != null && forword != ''){
+        			jumppage(forword, successMsg, repage);
+        		}
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			jumppage(11, 0);
+        			jumppage(11, 4, repage);
         		}
         	}
         }
@@ -181,7 +186,7 @@ function loadInitPersonalData(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			jumppage(11, 0);
+        			jumppage(11, 4, 110);
         		}
         	}	
         }
@@ -241,7 +246,7 @@ function loadEditPersonalData(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			jumppage(11, 0);
+        			jumppage(11, 4, 111);
         		}
         	}	
         }
@@ -325,18 +330,22 @@ function personalSubmit(){
 			z:sessionStorage.getItem("sessionID")
         };
 	
-	sendRequest("/c/p/umi", "post", data, "text", "/public/html5/personal/info_view.html", 3);
+	sendRequest("/c/p/umi", "post", data, "text", 111, 3, 0);
 }
 
 
 
-function jumppage(page, smsg){
+function jumppage(page, smsg, repage){
 
 	var successMsg="";
+	var resource="";
 	if(smsg != 0){
 		successMsg = "?successMsg="+smsg;
 	}
-	var loginpage = "/public/html5/login.html"+successMsg;;
+	if(repage != 0){
+		resource = "&repage="+repage;
+	}
+	var loginpage = "/public/html5/login.html"+successMsg+resource;
 	var personalviewpage = "/public/html5/personal/info_view.html"+successMsg;
 	var personaleditpage = "/public/html5/personal/info_edit.html"+successMsg;
 	var personalportraitpage = "/public/html5/personal/info_edit_portrait.html"+successMsg;
@@ -453,7 +462,7 @@ function loadInitTeamData(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			jumppage(11, 0);
+        			jumppage(11, 4, 120);
         		}
         	}	
         }
@@ -500,7 +509,7 @@ function loadEditTeamData(){
         	}else{
         		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			jumppage(11, 0);
+        			jumppage(11, 4, 121);
         		}
         	}	
         }
@@ -516,7 +525,7 @@ function teamSubmit(){
 			z:sessionStorage.getItem("sessionID")
         };
 	
-	sendRequest("/c/t/uti", "post", data, "text", "/public/html5/team/info_view.html", 3);
+	sendRequest("/c/t/uti", "post", data, "text", 120, 3, 0);
 }
 
 function loadInitGameData(){
@@ -572,7 +581,7 @@ function loadInitGameData(){
 
 function signup(){
 	if(sessionStorage.getItem("sessionID")==null||sessionStorage.getItem("sessionID")==''){
-		jumppage(11, 4);
+		jumppage(11, 4, 130);
 		return;
 	}
 	if(confirm("确认要报名吗?")){
@@ -581,7 +590,7 @@ function signup(){
 	            gId:id,
 	            z:sessionStorage.getItem("sessionID")
 	        };
-		sendRequest("/c/g/su", "get", data, "text", "/public/html5/game/info_view.html", 5);
+		sendRequest("/c/g/su", "get", data, "text", 130, 5, 130);
     }else{
         return;
     }
