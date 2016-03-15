@@ -3,9 +3,9 @@ user name:
 password:
 
 ECS
-139.196.17.246
-user name:
-password:
+139.196.204.45
+user name:root
+password:fsba-304
 
 RDS
 user name:
