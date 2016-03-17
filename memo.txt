@@ -4,6 +4,7 @@ password:
 
 ECS
 139.196.204.45
+m.ballerstarter.com
 user name:root
 password:fsba-304
 
@@ -13,7 +14,8 @@ password:
 
 微信公众号
 xueyi@nanqin.cc
-062655Xue
+第一个密码 062655Xue
+第二个密码 nnnqqq112233
 短信平台
 http://www.yuntongxun.com/api/voice
 

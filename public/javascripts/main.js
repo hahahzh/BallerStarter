@@ -9,36 +9,36 @@ function GetQueryString(name){
 var InterValObj; //timer变量，控制时间
 var count = 60; //间隔函数，1秒执行
 var curCount; //当前剩余秒数
-function sendCode(){
+function sendCode(type){
 
+	
 	var p = $("#phone").val();
 //	if(p == null || p == ''){
 //		alert("手机号不能为空");
 //		return;
 //	}
-	
+	var url;
+	if(type == 0)url = "/c/cd";
+	else if(type == 1)url = "/c/cdf";
 	var data = {
             phone:p
         };
+	
 	$.ajax({
-		url: "/c/cd",
+		url: url,
         type: "post",
         data: data,
         dataType: "text",
         success:function(msg){
             if(msg=='OK'){
-            	SetSMsg('8');
+            	SetVCCode();
             	curCount = count;
             	$("#vcButton").attr("disabled", true);
             	$("#vcButton").val(curCount+"秒");
             	InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
             }else{
-            	var obj = jQuery.parseJSON(msg); 
-            	if(obj.msg == 'error_parameter_phone'){
-            		jumppage(10, 6, 0);
-            	}else if(obj.msg == 'error_username_already_used'){
-        			jumppage(10, 7, 0);
-        		}
+            	var obj = jQuery.parseJSON(msg);
+            	findError(obj);
             }
         }
 	});
@@ -84,12 +84,12 @@ function regSubmit() {
 }
 
 function forgetPWDSubmit() {
-	var n = $("#p").val();
+	var n = $("#phone").val();
 	var vc = $("#vc").val();
 	var pwd = $("#pwd").val();
 	
 	var data = {
-            p:n,
+			phone:n,
             vc:vc,
             pwd:pwd
         };
@@ -100,7 +100,7 @@ function loginSubmit() {
 	var n = $("#name").val();
 	var pwd = $("#pwd").val();
 	var repage = GetQueryString("repage");
-	if(repage == null)repage = 111;
+	if(repage == null)repage = 110;
 	else repage = Number(repage);
 //	if(n == null || n == ''){
 //		alert("用户名不能为空");
@@ -133,20 +133,12 @@ function sendRequest(url, method, data, dataType, forword, successMsg, repage){
         			jumppage(forword, successMsg, repage);
         		}
         	}else{
-        		if(obj.msg == 'session_expired'){
-        			jumppage(11, 4, 0);
-        		}else if(obj.msg == 'error_username_already_used'){
-        			jumppage(10, 7, 0);
-        		}
+        		findError(obj);
         	}
         }
     });
 }
 
-var resultsData;
-function getRequestData(url, method, data, dataType, forword){
-	
-}
 
 function loadInitPersonalData(){
 	
@@ -333,7 +325,33 @@ function personalSubmit(){
 	sendRequest("/c/p/umi", "post", data, "text", 111, 3, 0);
 }
 
-
+function findError(obj){
+	if(obj.msg == 'error_parameter_phone'){
+		SetErrSMsg(100);
+	}else if(obj.msg == 'error_username_already_used'){
+		SetErrSMsg(101);
+	}else if(obj.msg == 'session_expired'){
+		SetSMsg(11, 4, 0);
+	}else if(obj.msg == 'error_parameter_pwd'){
+		SetErrSMsg(104);
+	}else if(obj.msg == 'error_parameter_vc'){
+		SetErrSMsg(105);
+	}else if(obj.msg == 'error_checkdigit'){
+		SetErrSMsg(106);
+	}else if(obj.msg == 'error_checkdigit_phone'){
+		SetErrSMsg(107);
+	}else if(obj.msg == 'error_checkdigit_time'){
+		SetErrSMsg(108);
+	}else if(obj.msg == 'error_parameter_name'){
+		SetErrSMsg(109);
+	}else if(obj.msg == 'error_username_or_password_not_match'){
+		SetErrSMsg(110);
+	}else if(obj.msg == 'error_username_not_exist'){
+		SetErrSMsg(111);
+	} else {
+		SetErrSMsg(200);
+	}
+}
 
 function jumppage(page, smsg, repage){
 
@@ -396,8 +414,13 @@ function jumppage(page, smsg, repage){
 	default:
 	}
 }
-
 var msgCount=3;
+
+function SetVCCode(){
+	$("#gmsg").text("验证码已发出!");
+	$("#gmsg").show();
+}
+
 function SetSMsg(code){
 	curCount = msgCount;
 	
@@ -411,17 +434,41 @@ function SetSMsg(code){
 		$("#gmsg").text("请先登录");
 	}else if('5' == code){
 		$("#gmsg").text("报名成功,请等待审核！");
-	}else if('6' == code){
-		$("#gmsg").text("请输入有效手机号码!");
-	}else if('7' == code){
-		$("#gmsg").text("该手机号已被注册!");
-	}else if('8' == code){
-		$("#gmsg").text("验证码已发出!");
-	}else if('9' == code){
-		$("#gmsg").text("参数验证错误!");
-	}else if('10' == code){
-		$("#gmsg").text("系统错误!");
 	}
+	$("#gmsg").show();
+	InterValObj = window.setInterval(SetSMsgTime, 1000); //启动计时器，1秒执行一次
+}
+
+function SetErrSMsg(code){
+	curCount = msgCount;
+	if(99 == code){
+		$("#gmsg").text("验证码已发出!");
+	}else if(100 == code){
+		$("#gmsg").text("请输入有效手机号码!");
+	}else if(101 == code){
+		$("#gmsg").text("该手机号已被注册!");
+	}else if(102 == code){
+		$("#gmsg").text("参数验证错误!");
+	}else if(200 == code){
+		$("#gmsg").text("系统错误!");
+	}else if(104 == code){
+		$("#gmsg").text("请输入密码!");
+	}else if(105 == code){
+		$("#gmsg").text("请输入验证码!");
+	}else if(106 == code){
+		$("#gmsg").text("验证码错误!");
+	}else if(107 == code){
+		$("#gmsg").text("手机号与验证码不匹配!");
+	}else if(108 == code){
+		$("#gmsg").text("验证码已过期!");
+	}else if(109 == code){
+		$("#gmsg").text("请输入用户名!");
+	}else if(110 == code){
+		$("#gmsg").text("用户名和密码不匹配!");
+	}else if(111 == code){
+		$("#gmsg").text("用户名不存在!");
+	}
+	
 	$("#gmsg").show();
 	InterValObj = window.setInterval(SetSMsgTime, 1000); //启动计时器，1秒执行一次
 }
@@ -764,7 +811,7 @@ function saveImg(){
             	if(obj.state==1){
             		jumppage(rs, 0, 0);
             	}else{
-            		jumppage(13, '10'， 0)
+            		jumppage(13, '10', 0)
             	}
             }
         });

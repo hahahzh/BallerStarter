@@ -103,7 +103,7 @@ public class Master extends Controller {
 	 * 
 	 * @param sessionID
 	 */
-	@Before(unless={"checkDigit","register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
+	@Before(unless={"checkDigit", "checkDigit2", "register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
 			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameInfo",
 			"getGameStandingsData","getGameResultsData"},priority=1)
 	public static void validateSessionID(@Required String z) {
@@ -916,9 +916,6 @@ public class Master extends Controller {
 	 * @param m_number
 	 */
 	public static void checkDigit(@Required String phone) {
-		if (Validation.hasErrors()) {
-			renderFail("error_parameter_required");
-		}
 		if(!Validation.phone(SUCCESS, phone).ok || phone.length() != 11){
 			renderFail("error_parameter_phone");
 		}
@@ -948,6 +945,42 @@ public class Master extends Controller {
 		renderText("OK");
 	}
 	
+	/**
+	 * 发送验证码到手机
+	 * 
+	 * @param m_number
+	 */
+	public static void checkDigit2(@Required String phone) {
+		if(!Validation.phone(SUCCESS, phone).ok || phone.length() != 11){
+			renderFail("error_parameter_phone");
+		}
+        Member m = Member.find("byPhone", phone).first();
+        if (m == null) {
+            m = Member.find("byWeixin", m).first();
+            if(m == null){
+            	List<Member> tmp = Member.find("byEmail", m).fetch();
+            	if(tmp.size() == 0)renderFail("error_username_not_exist"); 	
+            }
+        }
+		String n = String.valueOf(Math.random()).substring(2, 6);
+		
+		try {
+			boolean s = SendSMSMy.sendMsg(phone, n, "5");
+			if(!s)renderFail("error_unknown");
+			
+			CheckDigit cd = CheckDigit.find("m=?", phone).first();
+			if(cd == null)cd = new CheckDigit();
+			cd.d = n;
+			cd.updatetime = new Date().getTime();
+			cd.m = phone;
+			cd._save();
+		} catch (Exception e) {
+			play.Logger.error("checkDigit: PNumber="+phone+" digit="+n);
+			play.Logger.error(e.getMessage());
+			renderText(play.i18n.Messages.get("error_verification_code_sys"));
+		}
+		renderText("OK");
+	}
 	
 	/**
 	 * 用户注册
@@ -956,7 +989,9 @@ public class Master extends Controller {
 	 */
 	public static void register(@Required String phone, @Required String pwd, @Required String vc) {
 		if (Validation.hasErrors()) {
-			renderFail("error_parameter_required");
+			if(!Validation.phone(SUCCESS, phone).ok || phone.length() != 11)renderFail("error_parameter_phone");
+			if(StringUtil.isEmpty(vc))renderFail("error_parameter_vc");
+			if(StringUtil.isEmpty(pwd))renderFail("error_parameter_pwd");
 		}
 
 		try {			
@@ -967,11 +1002,11 @@ public class Master extends Controller {
 				renderFail("error_checkdigit");
 			}
 			if(!c.m.equals(phone)){
-				renderFail("error_checkdigit");
+				renderFail("error_checkdigit_phone");
 			}
 			if(new Date().getTime() - c.updatetime > 1800000){
 				c.delete();
-				renderFail("error_checkdigit");
+				renderFail("error_checkdigit_time");
 			}
 
 			Member m = Member.find("byPhone", phone.trim()).first();
@@ -981,6 +1016,8 @@ public class Master extends Controller {
 			}
 			
 			m = new Member();
+			m.name = "小明";
+			m.isAuth = false;
 			m.phone = phone;
 			m.pwd = pwd;
 			m.updated_at_ch = new Date();
@@ -1020,7 +1057,8 @@ public class Master extends Controller {
 	public static void login(@Required String name, @Required String pwd) {
 		// ....
 		if (Validation.hasErrors()) {
-			renderFail("error_parameter_required");
+			if(StringUtil.isEmpty(name))renderFail("error_parameter_name");
+			if(StringUtil.isEmpty(pwd))renderFail("error_parameter_pwd");
 		}
 
 		Member m = Member.find("byPhone", name).first();
@@ -1154,20 +1192,21 @@ public class Master extends Controller {
 	 * @throws UnsupportedEncodingException
 	 */
 	@SuppressWarnings("deprecation")
-	public static void sendResetPasswordSMS(@Required String p, String pwd, String vc)
+	public static void sendResetPasswordSMS(@Required String phone, @Required String pwd, @Required String vc)
 			throws UnsupportedEncodingException {
 
             if (Validation.hasErrors()) {
-                    renderFail("error_parameter_required");
+            	if(!Validation.phone(SUCCESS, phone).ok || phone.length() != 11)renderFail("error_parameter_phone");
+    			if(StringUtil.isEmpty(vc))renderFail("error_parameter_vc");
+    			if(StringUtil.isEmpty(pwd))renderFail("error_parameter_pwd");
             }
 
-            Member m = Member.find("byPhone", p).first();
+            Member m = Member.find("byPhone", phone).first();
             if (m == null) {
                 m = Member.find("byWeixin", m).first();
                 if(m == null){
                 	List<Member> tmp = Member.find("byEmail", m).fetch();
-                	if(tmp.size() == 0)renderFail("error_username_not_exist");
-                	if(StringUtil.isEmpty(tmp.get(0).email))renderFail("error_email_empty"); 	
+                	if(tmp.size() == 0)renderFail("error_username_not_exist"); 	
                 }
             }
 
@@ -1177,7 +1216,7 @@ public class Master extends Controller {
 			if(c == null){
 				renderFail("error_checkdigit");
 			}
-			if(!c.m.equals(p)){
+			if(!c.m.equals(phone)){
 				renderFail("error_checkdigit");
 			}
 			if(new Date().getTime() - c.updatetime > 1800000){

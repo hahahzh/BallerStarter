@@ -35,7 +35,9 @@
 $(document).ready(function() { 
 	
 	successMsg = GetQueryString("successMsg");
+	
 	$("#gmsg").hide();
+	
 	if(successMsg != null && successMsg != ''){
 		SetSMsg(successMsg);
 	}
@@ -74,7 +76,7 @@ $(document).ready(function() {
             	<div class="col-xs-8">
     			<input type="text" class="form-control" id="vc" name="vc" placeholder="验证码">
     			</div>
-    			<button type="button" class="btn btn-default" id="vcButton" onclick="sendCode();">免费获取</button>
+    			<button type="button" class="btn btn-default" id="vcButton" onclick="sendCode(0);">免费获取</button>
   			
   
             </div>
