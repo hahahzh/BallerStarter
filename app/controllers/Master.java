@@ -306,8 +306,8 @@ public class Master extends Controller {
 		results.put("weight", m.weight);
 		results.put("number", m.number);
 		results.put("team", m.team);
-		results.put("job1", m.job1.full_name);
-		results.put("job2", m.job2.full_name);
+		results.put("job1", m.job1==null?"":m.job1.full_name);
+		results.put("job2", m.job2==null?"":m.job2.full_name);
 		results.put("specialty", m.specialty);
 		if(m.img_ch != null && m.img_ch.exists()){
 			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
@@ -594,7 +594,7 @@ public class Master extends Controller {
 			renderFail("error_parameter_required");
 		}
 						
-		Game g = Game.find("isShow =1 order by id desc").first();
+		Game g = Game.find("isShow = 1 order by id desc").first();
 		
 		JSONObject results = initResultJSON();
 		
@@ -920,8 +920,14 @@ public class Master extends Controller {
 			renderFail("error_parameter_required");
 		}
 		if(!Validation.phone(SUCCESS, phone).ok || phone.length() != 11){
-			renderFail("error_parameter_required");
+			renderFail("error_parameter_phone");
 		}
+		
+		Member m = Member.find("byPhone", phone.trim()).first();
+		if(m != null){
+			renderFail("error_username_already_used");
+		}
+		
 		String n = String.valueOf(Math.random()).substring(2, 6);
 		
 		try {
@@ -1148,7 +1154,7 @@ public class Master extends Controller {
 	 * @throws UnsupportedEncodingException
 	 */
 	@SuppressWarnings("deprecation")
-	public static void sendResetPasswordSMS(@Required String p)
+	public static void sendResetPasswordSMS(@Required String p, String pwd, String vc)
 			throws UnsupportedEncodingException {
 
             if (Validation.hasErrors()) {
@@ -1166,8 +1172,22 @@ public class Master extends Controller {
             }
 
             if(m == null)renderFail("error_username_not_exist");
-            boolean flag = SendSMSMy.sendMsg(m.phone, m.pwd, "5");
-            if(!flag)renderFail("error_unknown");
+            
+            CheckDigit c = CheckDigit.find("d=?", vc).first();
+			if(c == null){
+				renderFail("error_checkdigit");
+			}
+			if(!c.m.equals(p)){
+				renderFail("error_checkdigit");
+			}
+			if(new Date().getTime() - c.updatetime > 1800000){
+				c.delete();
+				renderFail("error_checkdigit");
+			}
+            m.pwd = pwd.trim();
+            m._save();
+//            boolean flag = SendSMSMy.sendMsg(m.phone, m.pwd, "5");
+//            if(!flag)renderFail("error_unknown");
             renderSuccess(initResultJSON());
     }
 	

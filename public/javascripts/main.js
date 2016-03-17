@@ -12,10 +12,10 @@ var curCount; //当前剩余秒数
 function sendCode(){
 
 	var p = $("#phone").val();
-	if(p == null || p == ''){
-		alert("手机号不能为空");
-		return;
-	}
+//	if(p == null || p == ''){
+//		alert("手机号不能为空");
+//		return;
+//	}
 	
 	var data = {
             phone:p
@@ -27,15 +27,18 @@ function sendCode(){
         dataType: "text",
         success:function(msg){
             if(msg=='OK'){
-                alert("验证码已发出");
-
+            	SetSMsg('8');
             	curCount = count;
             	$("#vcButton").attr("disabled", true);
             	$("#vcButton").val(curCount+"秒");
             	InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
             }else{
             	var obj = jQuery.parseJSON(msg); 
-            	alert(obj.msg);
+            	if(obj.msg == 'error_parameter_phone'){
+            		jumppage(10, 6, 0);
+            	}else if(obj.msg == 'error_username_already_used'){
+        			jumppage(10, 7, 0);
+        		}
             }
         }
 	});
@@ -59,18 +62,18 @@ function regSubmit() {
 	var p = $("#phone").val();
 	var vc = $("#vc").val();
 	var pwd = $("#pwd").val();
-	if(p == null || p == ''){
-		alert("手机号不能为空");
-		return;
-	}
-	if(vc == null || vc == ''){
-		alert("验证码不能为空");
-		return;
-	}
-	if(pwd == null || pwd == ''){
-		alert("密码不能为空");
-		return;
-	}
+//	if(p == null || p == ''){
+//		alert("手机号不能为空");
+//		return;
+//	}
+//	if(vc == null || vc == ''){
+//		alert("验证码不能为空");
+//		return;
+//	}
+//	if(pwd == null || pwd == ''){
+//		alert("密码不能为空");
+//		return;
+//	}
 	var data = {
             phone:p,
             vc:vc,
@@ -82,13 +85,13 @@ function regSubmit() {
 
 function forgetPWDSubmit() {
 	var n = $("#p").val();
-	if(n == null || n == ''){
-		alert("用户名不能为空");
-		return;
-	}
+	var vc = $("#vc").val();
+	var pwd = $("#pwd").val();
 	
 	var data = {
-            p:n
+            p:n,
+            vc:vc,
+            pwd:pwd
         };
 	sendRequest("/c/fps", "post", data, "text", 11, 2, 0);
 }
@@ -99,14 +102,14 @@ function loginSubmit() {
 	var repage = GetQueryString("repage");
 	if(repage == null)repage = 111;
 	else repage = Number(repage);
-	if(n == null || n == ''){
-		alert("用户名不能为空");
-		return;
-	}
-	if(pwd == null || pwd == ''){
-		alert("密码不能为空");
-		return;
-	}
+//	if(n == null || n == ''){
+//		alert("用户名不能为空");
+//		return;
+//	}
+//	if(pwd == null || pwd == ''){
+//		alert("密码不能为空");
+//		return;
+//	}
 	var data = {
             name:n,
             pwd:pwd
@@ -130,9 +133,10 @@ function sendRequest(url, method, data, dataType, forword, successMsg, repage){
         			jumppage(forword, successMsg, repage);
         		}
         	}else{
-        		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
-        			jumppage(11, 4, repage);
+        			jumppage(11, 4, 0);
+        		}else if(obj.msg == 'error_username_already_used'){
+        			jumppage(10, 7, 0);
         		}
         	}
         }
@@ -184,7 +188,6 @@ function loadInitPersonalData(){
             	$("#constellation").text(obj.results.constellation);
             	$("#blood").text(obj.results.blood);
         	}else{
-        		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
         			jumppage(11, 4, 110);
         		}
@@ -244,7 +247,6 @@ function loadEditPersonalData(){
             	job1 = obj.results.job1;
             	job2 = obj.results.job2;
         	}else{
-        		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
         			jumppage(11, 4, 111);
         		}
@@ -296,8 +298,6 @@ function loadEditPersonalData(){
         				}
         			}
         		});
-        	}else{
-        		alert(obj.msg);
         	}	
         }
     });
@@ -345,6 +345,7 @@ function jumppage(page, smsg, repage){
 	if(repage != 0){
 		resource = "&repage="+repage;
 	}
+	var regpage = "/public/html5/reg.html"+successMsg+resource;
 	var loginpage = "/public/html5/login.html"+successMsg+resource;
 	var personalviewpage = "/public/html5/personal/info_view.html"+successMsg;
 	var personaleditpage = "/public/html5/personal/info_edit.html"+successMsg;
@@ -356,6 +357,9 @@ function jumppage(page, smsg, repage){
 	var teamcaptainpage = "/public/html5/team/info_edit_captain.html"+successMsg;
 	var gameviewpage = "/public/html5/game/info_view.html"+successMsg;
 	switch(page){
+	case 10:
+		window.location = regpage;
+		break;
 	case 11:
 		window.location = loginpage;
 		break;
@@ -396,16 +400,27 @@ function jumppage(page, smsg, repage){
 var msgCount=3;
 function SetSMsg(code){
 	curCount = msgCount;
+	
 	if('1' == code){
 		$("#gmsg").text("注册成功！");
 	}else if('2' == code){
-		$("#gmsg").text("请到注册邮箱查收新密码!");
+		$("#gmsg").text("请等待短信找回密码!");
 	}else if('3' == code){
 		$("#gmsg").text("修改成功!");
 	}else if('4' == code){
 		$("#gmsg").text("请先登录");
 	}else if('5' == code){
 		$("#gmsg").text("报名成功,请等待审核！");
+	}else if('6' == code){
+		$("#gmsg").text("请输入有效手机号码!");
+	}else if('7' == code){
+		$("#gmsg").text("该手机号已被注册!");
+	}else if('8' == code){
+		$("#gmsg").text("验证码已发出!");
+	}else if('9' == code){
+		$("#gmsg").text("参数验证错误!");
+	}else if('10' == code){
+		$("#gmsg").text("系统错误!");
 	}
 	$("#gmsg").show();
 	InterValObj = window.setInterval(SetSMsgTime, 1000); //启动计时器，1秒执行一次
@@ -460,7 +475,6 @@ function loadInitTeamData(){
         		});
         		$("#t_v_members").append(str);
         	}else{
-        		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
         			jumppage(11, 4, 120);
         		}
@@ -507,7 +521,6 @@ function loadEditTeamData(){
         		});
         		$("#t_e_members").append(str);
         	}else{
-        		alert(obj.msg);
         		if(obj.msg == 'session_expired'){
         			jumppage(11, 4, 121);
         		}
@@ -573,7 +586,7 @@ function loadInitGameData(){
         		});
         		$("#g_v_teams").append(str);
         	}else{
-        		alert(obj.msg);
+//        		alert(obj.msg);
         	}	
         }
     });
@@ -635,7 +648,9 @@ function loadGameStandingsData(){
         		});
         		$("#g_v_standings").append(str);
         	}else{
-        		alert(obj.msg);
+        		if(obj.msg == 'error_parameter_required'){
+        			jumppage(130, '0', 0);
+        		}
         	}	
         }
     });
@@ -676,7 +691,7 @@ function loadGameResultsData(){
         		});
         		$("#g_v_results").append(str);
         	}else{
-        		alert(obj.msg);
+        		jumppage(130, '0', 0);
         	}	
         }
     });
@@ -747,9 +762,9 @@ function saveImg(){
             	data = RegExp.$1;
             	var obj = jQuery.parseJSON(data);
             	if(obj.state==1){
-            		jumppage(rs, 0);
+            		jumppage(rs, 0, 0);
             	}else{
-            		alert(obj.msg);
+            		jumppage(13, '10'， 0)
             	}
             }
         });
