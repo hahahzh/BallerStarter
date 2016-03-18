@@ -19,6 +19,12 @@ xueyi@nanqin.cc
 短信平台
 http://www.yuntongxun.com/api/voice
 
+code=0318112a38980ffddd89c9388ff75b7k
+appID=wx245cd14422e15ae4
+Token=FSBAwx
+key=QR4MArjyPSbGHW8y6K5Al1sRY6I1HC0Pxi2egkW3oNb
+AppSecret=e65a573f636d429b9ef83c881b41af24
+
 项目名
 Baller Starter
 
@@ -47,6 +53,9 @@ mail.smtp.port=465
 mail.smtp.user=xueyi
 mail.smtp.pass=062655Xue
 mail.smtp.from=xueyi@nanqin.cc
+
+
+signature=4d0a16197e34341ef10e4a42c69f816bcf27a7cb timestamp=1458285971 nonce=425950136 echostr=280305226664111611
 
 页面规则
 base
