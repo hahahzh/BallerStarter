@@ -43,6 +43,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Http.Header;
 import utils.DateUtil;
+import utils.HttpTool;
 import utils.JSONUtil;
 import utils.SendMail;
 import utils.SendSMSMy;
@@ -95,6 +96,11 @@ public class Master extends Controller {
 	public static final int error_already_exists = 21;// 已存在
 	public static final int error_parameter_formate = 22;// 格式错误
 
+	private static final String code= "0318112a38980ffddd89c9388ff75b7k";
+	private static final String appID= "wx245cd14422e15ae4";
+	private static final String AppSecret = "e65a573f636d429b9ef83c881b41af24";
+	private static final String urlToken = "https://api.weixin.qq.com/sns/oauth2/access_token?appid="+appID+"&secret="+AppSecret+"&code="+code+"&grant_type=authorization_code";
+	private static final String urlWX = "https://api.weixin.qq.com/sns/userinfo?access_token=_ACCESS_TOKEN&openid=_OPENID";
 	// 存储Session副本
 	public static ThreadLocal<Session> sessionCache = new ThreadLocal<Session>();
 	
@@ -109,9 +115,28 @@ public class Master extends Controller {
 	public static void validateSessionID(@Required String z) {
 		
 		Session s = Session.find("bySessionID",z).first();
-		sessionCache.set(s);
 		if (s == null) {
-			renderFail("session_expired");
+			String openID = getWXOpenID();
+			if(openID == null)renderFail("session_expired");
+			Member m = Member.find("byOpenID", openID).first();
+			if(m == null)renderFail("session_expired");
+			s = new Session();
+			s.member = m;
+			s.sessionID = UUID.randomUUID().toString();
+			s.date = new Date();
+			s._save();
+		}
+		sessionCache.set(s);
+	}
+	
+	private static String getWXOpenID(){
+		String rToken = HttpTool.getHttpInputStream(urlToken);
+		play.Logger.info("getWXOpenID rToken="+rToken);
+		JSONObject jsonToken = JSONObject.fromObject(rToken);
+		if(jsonToken.containsKey("openid")){
+			return jsonToken.getString("openid");
+		}else{
+			return null;
 		}
 	}
 	
@@ -809,6 +834,37 @@ public class Master extends Controller {
 		renderSuccess(results);
 	}
 	
+	private static void setupWXInfo(Member m){
+		String rToken = HttpTool.getHttpInputStream(urlToken);
+		play.Logger.info("setupWXInfo rToken="+rToken);
+		JSONObject jsonToken = JSONObject.fromObject(rToken);
+		play.Logger.info("setupWXInfo jsonToken="+jsonToken);
+		String access_token = jsonToken.getString("access_token");
+		String openid = jsonToken.getString("openid");
+		if(!StringUtil.isEmpty(access_token) && !StringUtil.isEmpty(openid)){
+			String rWX = HttpTool.getHttpInputStream(urlWX.replace("_ACCESS_TOKEN", access_token).replace("_OPENID", openid));
+			if(!StringUtil.isEmpty(rWX)){
+				JSONObject jsonWX = JSONObject.fromObject(rWX);
+				m.openID = jsonWX.getString("openid");
+				m.nickname = jsonWX.getString("nickname");
+				switch (jsonWX.getInt("sex")) {
+				case 1:
+					m.gender = "男";
+					break;
+				case 2:
+					m.gender = "女";
+					break;
+				default:
+					m.gender = "未知";
+					break;
+				}
+				m.region = jsonWX.getString("province")+" "+jsonWX.getString("city");
+				m.nationality = jsonWX.getString("country");
+				m.headimgurl = jsonWX.getString("headimgurl");
+				m._save();
+			}
+		}
+	}
 	
 	public static void insertSN(@Required String username, @Required String pwd, @Required String from,@Required String to) {
 		if (Validation.hasErrors()) {
@@ -1021,7 +1077,8 @@ public class Master extends Controller {
 			m.phone = phone;
 			m.pwd = pwd;
 			m.updated_at_ch = new Date();
-			m.save();
+			m._save();
+			setupWXInfo(m);			
 			//c.delete();
 			
 			Session s = new Session();

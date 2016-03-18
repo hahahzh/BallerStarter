@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                                       Application.index
+GET     /oauth2                                 Application.oauth2
 *		/c/r									Master.register
 *		/c/cd									Master.checkDigit
 *		/c/cdf									Master.checkDigit2

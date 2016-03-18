@@ -65,6 +65,8 @@ public class Member extends Model {
 	public Constellation constellation;
 	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
 	public Blood blood;
+	@Hidden
+	public String headimgurl;
 	
 	public String toString() {
 		return name;
