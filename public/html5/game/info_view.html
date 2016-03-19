@@ -35,6 +35,8 @@
 <script type="text/javascript">
 $(document).ready(function() { 
 	successMsg = GetQueryString("successMsg");
+	var code = GetQueryString("code");
+	$("#code").val(code);
 	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
 		
@@ -54,7 +56,8 @@ $(document).ready(function() {
         
       </div>
 <div class="container theme-showcase" role="main">
-<input type="hidden" id="gId"/>    
+<input type="hidden" id="gId"/>
+<input type="hidden" id="code" name="code" value=""> 
 <table class="table table-striped">
 <tr>
   <td>
@@ -67,7 +70,7 @@ $(document).ready(function() {
 <tr>
   <td style="width: 50%;">LOGO</td>
   <td>
-  <img src="/public/images/glogo.jpg" name=v_img_g_logo id="v_img_g_logo">
+  <img src="/public/images/glogo.jpg" name=v_img_g_logo id="v_img_g_logo" width="100" height="100">
   </td>
 </tr>
 <tr>

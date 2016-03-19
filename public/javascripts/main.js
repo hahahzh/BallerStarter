@@ -58,7 +58,7 @@ function SetRemainTime() {
 }
 
 function regSubmit() {
-	
+	var code = $("#code").val();
 	var p = $("#phone").val();
 	var vc = $("#vc").val();
 	var pwd = $("#pwd").val();
@@ -75,6 +75,7 @@ function regSubmit() {
 //		return;
 //	}
 	var data = {
+			code:code,
             phone:p,
             vc:vc,
             pwd:pwd
@@ -125,10 +126,10 @@ function sendRequest(url, method, data, dataType, forword, successMsg, repage){
         dataType: dataType,
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
+        	if(obj.session != null && obj.session != ''){
+    			sessionStorage.setItem("sessionID", obj.session);
+    		}
         	if(obj.state==1){
-        		if(obj.results.session != null && obj.results.session != ''){
-        			sessionStorage.setItem("sessionID", obj.results.session);
-        		}
         		if(forword != null && forword != ''){
         			jumppage(forword, successMsg, repage);
         		}
@@ -141,8 +142,9 @@ function sendRequest(url, method, data, dataType, forword, successMsg, repage){
 
 
 function loadInitPersonalData(){
-	
+	var code = $("#code").val();
 	var data = {
+			code:code,
             z:sessionStorage.getItem("sessionID")
         };
 	
@@ -153,6 +155,7 @@ function loadInitPersonalData(){
         dataType: "text",
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
+        	sessionStorage.setItem("sessionID", obj.session);
         	if(obj.state==1){
         		$("#v_img_ch").attr("src", obj.results.img_ch);
         		$("#name").text(obj.results.name);
@@ -322,7 +325,7 @@ function personalSubmit(){
 			z:sessionStorage.getItem("sessionID")
         };
 	
-	sendRequest("/c/p/umi", "post", data, "text", 111, 3, 0);
+	sendRequest("/c/p/umi", "post", data, "text", 110, 3, 0);
 }
 
 function findError(obj){
@@ -348,6 +351,10 @@ function findError(obj){
 		SetErrSMsg(110);
 	}else if(obj.msg == 'error_username_not_exist'){
 		SetErrSMsg(111);
+	}else if(obj.msg == 'error_team_notexist'){
+		SetErrSMsg(112);
+	}else if(obj.msg == 'error_nothave_game'){
+		SetErrSMsg(113);
 	} else {
 		SetErrSMsg(200);
 	}
@@ -467,6 +474,10 @@ function SetErrSMsg(code){
 		$("#gmsg").text("用户名和密码不匹配!");
 	}else if(111 == code){
 		$("#gmsg").text("用户名不存在!");
+	}else if(112 == code){
+		$("#gmsg").text("尚未创建球队!");
+	}else if(113 == code){
+		$("#gmsg").text("最近没有比赛!");
 	}
 	
 	$("#gmsg").show();
@@ -482,9 +493,11 @@ function SetSMsgTime() {
 	}
 }
 
+
 function loadInitTeamData(){
-	
+	var code = $("#code").val();
 	var data = {
+			code:code,
             z:sessionStorage.getItem("sessionID")
         };
 	$.ajax({
@@ -494,6 +507,8 @@ function loadInitTeamData(){
         dataType: "text",
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
+        	sessionStorage.setItem("sessionID", obj.session);
+        	
         	if(obj.state==1){
         		$("#v_img_t_logo").attr("src", obj.results.logo);
         		$("#name").text(obj.results.name);
@@ -503,6 +518,7 @@ function loadInitTeamData(){
         		$("#captain").text(obj.results.captain);
         		$("#contact").text(obj.results.contact);
         		$("#updated_at_ch").text(obj.results.updated_at_ch);
+        		
         		str = "";
         		$.each(obj.results.members, function(index, json) {
         			str+="<tr><td>";
@@ -522,6 +538,7 @@ function loadInitTeamData(){
         		});
         		$("#t_v_members").append(str);
         	}else{
+        		findError(obj);
         		if(obj.msg == 'session_expired'){
         			jumppage(11, 4, 120);
         		}
@@ -541,14 +558,16 @@ function loadEditTeamData(){
         dataType: "text",
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
+        	sessionStorage.setItem("sessionID", obj.session);
         	if(obj.state==1){
         		$("#v_img_t_logo").attr("src", obj.results.logo);
         		$("#name").val(obj.results.name);
-        		$("#v_coach_img").val(obj.results.coach_img);
+        		$("#v_coach_img").attr("src", obj.results.coach_img);
         		$("#coach").val(obj.results.coach);
-          		$("#v_captain_img").val(obj.results.captain_img);
-        		$("#captain").val(obj.results.captain);
+        		$("#v_captain_img").attr("src", obj.results.captain_img);
+          		$("#captain").val(obj.results.captain);
         		$("#contact").val(obj.results.contact);
+        		
         		str = "";
         		$.each(obj.results.members, function(index, json) {
         			str+="<tr><td>";
@@ -634,6 +653,7 @@ function loadInitGameData(){
         		$("#g_v_teams").append(str);
         	}else{
 //        		alert(obj.msg);
+        		findError(obj);
         	}	
         }
     });

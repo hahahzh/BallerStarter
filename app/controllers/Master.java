@@ -72,35 +72,13 @@ public class Master extends Controller {
 	public static final int THREE = 3;
 	public static final int FOUR = 4;
 	public static final int FIVE = 5;
-	
-	public static final int error_parameter_required = 1;// 缺少必须参数
-	public static final int error_username_already_used = 2;// 已存在的用户名
-	public static final int error_username_not_exist = 3;// 不存在用户名
-	public static final int error_userid_not_exist = 4;// 用户ID不存在
-	public static final int error_not_owner = 5;// 不是定位器的拥有者
-	public static final int error_unknown = 6;// 未知错误
-	public static final int error_rwatch_not_exist = 7;// 定位器不存在
-	public static final int error_both_email_phonenumber_empty = 8;// 电话号码或Email为空
-	public static final int error_username_or_password_not_match = 9;// 用户名或密码不匹配
-	public static final int error_session_expired = 10;// 会话过期
-	public static final int error_mail_resetpassword = 11;// 密码重置错误
-	public static final int error_rwatch_bind_full = 12;// 不能绑定过多定位器
-	public static final int error_rwatch_already_bind = 13;// 定位器已被绑定
-	public static final int error_unknown_waring_format = 14;// 未知警报
-	public static final int error_unknown_command = 15;// 未知命令
-	public static final int error_rwatch_not_confirmed = 16;// 定位器未确认
-	public static final int error_dateformat = 17;// 日期格式错误
-	public static final int error_rwatch_max = 18;// 拥有定位器过多
-	public static final int error_download = 19;// 下载错误
-	public static final int error_send_mail_fail = 20;// 发送Email错误
-	public static final int error_already_exists = 21;// 已存在
-	public static final int error_parameter_formate = 22;// 格式错误
 
-	private static final String code= "0318112a38980ffddd89c9388ff75b7k";
 	private static final String appID= "wx245cd14422e15ae4";
 	private static final String AppSecret = "e65a573f636d429b9ef83c881b41af24";
-	private static final String urlToken = "https://api.weixin.qq.com/sns/oauth2/access_token?appid="+appID+"&secret="+AppSecret+"&code="+code+"&grant_type=authorization_code";
-	private static final String urlWX = "https://api.weixin.qq.com/sns/userinfo?access_token=_ACCESS_TOKEN&openid=_OPENID";
+	private static String CODE = "";
+//	private static String urlCode = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="+appID+"&redirect_uri=http://m.ballerstarter.com/oauth2&response_type=code&scope=snsapi_userinfo&state=1"; 
+	private static String urlToken = "https://api.weixin.qq.com/sns/oauth2/access_token?appid="+appID+"&secret="+AppSecret+"&grant_type=authorization_code&code=";
+	private static String urlWX = "https://api.weixin.qq.com/sns/userinfo?access_token=_ACCESS_TOKEN&openid=_OPENID";
 	// 存储Session副本
 	public static ThreadLocal<Session> sessionCache = new ThreadLocal<Session>();
 	
@@ -112,25 +90,32 @@ public class Master extends Controller {
 	@Before(unless={"checkDigit", "checkDigit2", "register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
 			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameInfo",
 			"getGameStandingsData","getGameResultsData"},priority=1)
-	public static void validateSessionID(@Required String z) {
-		
+	public static void validateSessionID(String code, @Required String z) {
+		play.Logger.info("validateSessionID start");
 		Session s = Session.find("bySessionID",z).first();
 		if (s == null) {
-			String openID = getWXOpenID();
+			String openID = getWXOpenID(code);
 			if(openID == null)renderFail("session_expired");
 			Member m = Member.find("byOpenID", openID).first();
+			play.Logger.info("validateSessionID m="+m.openID);
 			if(m == null)renderFail("session_expired");
-			s = new Session();
-			s.member = m;
-			s.sessionID = UUID.randomUUID().toString();
-			s.date = new Date();
-			s._save();
+			s = Session.find("member_openid=?",m.id).first();
+			if(s == null){
+				s = new Session();
+				s.member = m;
+				s.sessionID = UUID.randomUUID().toString();
+				s.date = new Date();
+				s._save();
+			}
+			play.Logger.info("validateSessionID s="+s.member.toString());
 		}
 		sessionCache.set(s);
+		play.Logger.info("validateSessionID end");
 	}
 	
-	private static String getWXOpenID(){
-		String rToken = HttpTool.getHttpInputStream(urlToken);
+	private static String getWXOpenID(String code){
+		play.Logger.info("getWXOpenID url="+urlToken+code);
+		String rToken = HttpTool.getHttpInputStream(urlToken+code);
 		play.Logger.info("getWXOpenID rToken="+rToken);
 		JSONObject jsonToken = JSONObject.fromObject(rToken);
 		if(jsonToken.containsKey("openid")){
@@ -139,7 +124,8 @@ public class Master extends Controller {
 			return null;
 		}
 	}
-	
+
+    
 	public static void getBlood(){
 		List<Blood> ls = Blood.findAll();
 		JSONObject results = initResultJSON();
@@ -299,6 +285,7 @@ public class Master extends Controller {
 		}
 
 		m.save();
+		
 		renderSuccess(initResultJSON());
 	}
 	
@@ -307,18 +294,19 @@ public class Master extends Controller {
 	 * 
 	 * @param z
 	 */
-	public static void getMemberInfo(@Required String z) {
-		
-		if (Validation.hasErrors()) {
-			renderFail("error_parameter_required");
-		}
+	public static void getMemberInfo(String code, @Required String z) {
+		play.Logger.info("getMemberInfo start");
+//		if (Validation.hasErrors()) {
+//			renderFail("error_parameter_required");
+//		}
 		
 		Session s = sessionCache.get();
 		if(s == null){
-			renderFail("error_session_expired");
+			renderFail("session_expired");
 		}
 		
 		Member m = s.member;
+		play.Logger.info("getMemberInfo m="+m.toString());
 		JSONObject results = initResultJSON();
 	
 		results.put("name", m.name);
@@ -337,7 +325,9 @@ public class Master extends Controller {
 		if(m.img_ch != null && m.img_ch.exists()){
 			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
 		}else{
-			if(m.gender == null){
+			if(!StringUtil.isEmpty(m.headimgurl)){
+				results.put("img_ch", m.headimgurl);
+			}else if(m.gender == null){
 				results.put("img_ch", BOY);
 			}else{
 				results.put("img_ch", GIRL);
@@ -351,7 +341,8 @@ public class Master extends Controller {
 		results.put("constellation", m.constellation==null?"":m.constellation.name);
 		results.put("blood", m.blood==null?"":m.blood.name);
 		results.put("updated_at_ch", m.updated_at_ch);
-
+		play.Logger.info("getMemberInfo"+results.toString());
+		play.Logger.info("getMemberInfo end");
 		renderSuccess(results);
 	}
 
@@ -368,7 +359,7 @@ public class Master extends Controller {
 		
 		Session s = sessionCache.get();
 		if(s == null){
-			renderFail("error_session_expired");
+			renderFail("session_expired");
 		}
 		
 		Member m = s.member;
@@ -447,19 +438,20 @@ public class Master extends Controller {
 	 * 
 	 * @param z
 	 */
-	public static void getPTeamInfo(@Required String z) {
+	public static void getPTeamInfo(String code, @Required String z) {
 		
-		if (Validation.hasErrors()) {
-			renderFail("error_parameter_required");
-		}
+//		if (Validation.hasErrors()) {
+//			renderFail("error_parameter_required");
+//		}
 		
 		Session s = sessionCache.get();
 		if(s == null){
-			renderFail("error_session_expired");
+			renderFail("session_expired");
 		}
 				
 		Team t = Team.find("byCoach", s.member).first();
 		if(t == null)Team.find("byCaptain", s.member).first();
+		if(t == null)renderFail("error_team_notexist");
 				
 		JSONObject results = initResultJSON();
 	
@@ -471,10 +463,18 @@ public class Master extends Controller {
 		results.put("name", t.name);
 		if(t.coach.img_ch != null && t.coach.img_ch.exists()){
 			results.put("coach_img", "/c/download?id=" + t.coach.id + "&fileID=img_ch&entity=" + t.coach.getClass().getName() + "&z=" + z);
+		}else if(!StringUtil.isEmpty(t.coach.headimgurl)){
+			results.put("coach_img", t.coach.headimgurl);
+		}else{
+			results.put("coach_img", BOY);
 		}
 		results.put("coach", t.coach==null?"":t.coach.name);
 		if(t.captain.img_ch != null && t.captain.img_ch.exists()){
 			results.put("captain_img", "/c/download?id=" + t.captain.id + "&fileID=img_ch&entity=" + t.captain.getClass().getName() + "&z=" + z);
+		}else if(!StringUtil.isEmpty(t.captain.headimgurl)){
+			results.put("captain_img", t.captain.headimgurl);
+		}else{
+			results.put("captain_img", BOY);
 		}
 		results.put("captain", t.captain==null?"":t.captain.name);
 		results.put("contact", t.contact);
@@ -490,6 +490,8 @@ public class Master extends Controller {
 				data.put("weight", m.weight);
 				if(m.img_ch != null && m.img_ch.exists()){
 					data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
+				}else if(!StringUtil.isEmpty(m.headimgurl)){
+					data.put("img_ch", m.headimgurl);
 				}else{
 					data.put("img_ch", BOY);
 				}
@@ -514,7 +516,7 @@ public class Master extends Controller {
 		
 		Session s = sessionCache.get();
 		if(s == null){
-			renderFail("error_session_expired");
+			renderFail("session_expired");
 		}
 				
 		List<Team> ts = Team.findAll();
@@ -547,7 +549,7 @@ public class Master extends Controller {
 		
 		Session s = sessionCache.get();
 		if(s == null){
-			renderFail("error_session_expired");
+			renderFail("session_expired");
 		}
 				
 		List<Result> ts = Result.find("home_team_id", teamId).first();
@@ -588,7 +590,7 @@ public class Master extends Controller {
 		
 		Session s = sessionCache.get();
 		if(s == null){
-			renderFail("error_session_expired");
+			renderFail("session_expired");
 		}
 				
 		List<Constellation> cs = Constellation.findAll();
@@ -660,24 +662,8 @@ public class Master extends Controller {
 				}
 			}
 			results.put("teamlist", teamlist);
-			
-//			List<Result> rs = Result.find("byGame", g).fetch();
-//			JSONArray resultlist = initResultJSONArray();
-//			if(rs.size() > 0){
-//				JSONObject data = initResultJSON();
-//				for(Result r:rs){
-//					data.put("round", r.round);
-//					data.put("home_team", r.home_team);
-//					data.put("visiting_team", r.visiting_team);
-//					data.put("home_team_point", r.home_team_point);
-//					data.put("visiting_team_point", r.visiting_team_point);
-//					data.put("home_team_integral", r.home_team_integral);
-//					data.put("visiting_team_integral", r.visiting_team_integral);
-//					data.put("date", r.date);
-//					resultlist.add(data);
-//				}
-//			}
-//			results.put("resultlist", resultlist);
+		}else{
+			renderFail("error_nothave_game");
 		}
 		renderSuccess(results);
 	}
@@ -687,15 +673,15 @@ public class Master extends Controller {
 	 * 
 	 * @param z
 	 */
-	public static void signUp(@Required Long gId, @Required String z) {
+	public static void signUp(String code, @Required Long gId, @Required String z) {
 		
-		if (Validation.hasErrors()) {
-			renderFail("error_parameter_required");
-		}
+//		if (Validation.hasErrors()) {
+//			renderFail("error_parameter_required");
+//		}
 		
 		Session s = sessionCache.get();
 		if(s == null){
-			renderFail("error_session_expired");
+			renderFail("session_expired");
 		}
 				
 		Game g = Game.findById(gId);
@@ -834,8 +820,10 @@ public class Master extends Controller {
 		renderSuccess(results);
 	}
 	
-	private static void setupWXInfo(Member m){
-		String rToken = HttpTool.getHttpInputStream(urlToken);
+	private static void setupWXInfo(Member m, String code){
+		
+		play.Logger.info("setupWXInfo url="+urlToken+code);
+		String rToken = HttpTool.getHttpInputStream(urlToken+code);
 		play.Logger.info("setupWXInfo rToken="+rToken);
 		JSONObject jsonToken = JSONObject.fromObject(rToken);
 		play.Logger.info("setupWXInfo jsonToken="+jsonToken);
@@ -1043,7 +1031,7 @@ public class Master extends Controller {
 	 * 
 	 * @param z
 	 */
-	public static void register(@Required String phone, @Required String pwd, @Required String vc) {
+	public static void register(@Required String phone, @Required String pwd, @Required String vc, String code) {
 		if (Validation.hasErrors()) {
 			if(!Validation.phone(SUCCESS, phone).ok || phone.length() != 11)renderFail("error_parameter_phone");
 			if(StringUtil.isEmpty(vc))renderFail("error_parameter_vc");
@@ -1051,7 +1039,6 @@ public class Master extends Controller {
 		}
 
 		try {			
-			
 		
 			CheckDigit c = CheckDigit.find("d=?", vc).first();
 			if(c == null){
@@ -1060,7 +1047,7 @@ public class Master extends Controller {
 			if(!c.m.equals(phone)){
 				renderFail("error_checkdigit_phone");
 			}
-			if(new Date().getTime() - c.updatetime > 1800000){
+			if(new Date().getTime() - c.updatetime > 1800000000){
 				c.delete();
 				renderFail("error_checkdigit_time");
 			}
@@ -1070,15 +1057,15 @@ public class Master extends Controller {
 				play.Logger.info("register:error_username_already_used");
 				renderFail("error_username_already_used");
 			}
-			
+	
 			m = new Member();
 			m.name = "小明";
 			m.isAuth = false;
 			m.phone = phone;
 			m.pwd = pwd;
 			m.updated_at_ch = new Date();
-			m._save();
-			setupWXInfo(m);			
+//			m._save();
+			setupWXInfo(m, code);
 			//c.delete();
 			
 			Session s = new Session();
@@ -1089,9 +1076,10 @@ public class Master extends Controller {
 			
 			JSONObject results = initResultJSON();
 			results.put("phone", m.phone);
-			results.put("session", s.sessionID);
 			play.Logger.info("register:OK "+m.phone);
+			
 			renderSuccess(results);
+			
 		} catch (Exception e) {
 			play.Logger.info("register:error "+e.getMessage());
 			renderFail("error_unknown");
@@ -1143,10 +1131,8 @@ public class Master extends Controller {
 		m._save();
 		sessionCache.set(s);
 		
-		JSONObject results = initResultJSON();
-		results.put("session", s.sessionID);
 		play.Logger.info("login:OK "+m.phone);
-		renderSuccess(results);
+		renderSuccess(initResultJSON());
 	}
 	
 	
@@ -1376,6 +1362,8 @@ public class Master extends Controller {
 	protected static void renderSuccess(JSONObject results) {
 		JSONObject jsonDoc = new JSONObject();
 		jsonDoc.put("state", SUCCESS);
+		Session s = sessionCache.get();
+		if(s != null && !StringUtil.isEmpty(s.sessionID))jsonDoc.put("session", s.sessionID);
 		jsonDoc.put("results",results);
 		renderJSON(jsonDoc.toString());
 	}
@@ -1383,6 +1371,8 @@ public class Master extends Controller {
 	protected static void renderFail(String key, Object... objects) {
 		JSONObject jsonDoc = new JSONObject();
 		jsonDoc.put("state", FAIL);
+		Session s = sessionCache.get();
+		if(s != null && !StringUtil.isEmpty(s.sessionID))jsonDoc.put("session", s.sessionID);
 		jsonDoc.put("msg", Messages.get(key));
 		renderJSON(jsonDoc.toString());
 	}

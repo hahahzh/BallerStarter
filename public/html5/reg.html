@@ -35,7 +35,10 @@
 $(document).ready(function() { 
 	
 	successMsg = GetQueryString("successMsg");
-	
+	var code = GetQueryString("code");
+	$("#code").val(code);
+	var code = GetQueryString("access_token");
+	$("#vc").val(code);
 	$("#gmsg").hide();
 	
 	if(successMsg != null && successMsg != ''){
@@ -57,6 +60,7 @@ $(document).ready(function() {
       </div>
     <div class="container theme-showcase" role="main">
 <form method="post" id="regForm" action="/c/r" class="form-inline">
+<input type="hidden" id="code" name="code">
 <div class="col-sm-12">
           <div class="panel panel-default">
             <div class="panel-heading">

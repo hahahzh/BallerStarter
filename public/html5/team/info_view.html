@@ -35,6 +35,8 @@
 <script type="text/javascript">
 $(document).ready(function() { 
 	successMsg = GetQueryString("successMsg");
+	var code = GetQueryString("code");
+	$("#code").val(code);
 	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
 		SetSMsg(successMsg);
@@ -53,20 +55,12 @@ $(document).ready(function() {
         
       </div>
 <div class="container theme-showcase" role="main">
-    
+<input type="hidden" id="code" name="code" value="">
 <table class="table table-striped">
-<tr>
-  <td>
-  <button type="button" onclick="jumppage(121, 0, 0);" class="btn btn-default form-control" id="tEdit">编辑</button>
-  </td>
-  <td>
-	
-  </td>
-</tr>
 <tr>
   <td style="width: 50%;">LOGO</td>
   <td>
-  <img src="/public/images/girl.jpg" name=v_img_t_logo id="v_img_t_logo">
+  <img src="/public/images/girl.jpg" name=v_img_t_logo id="v_img_t_logo" width="100" height="100">
   </td>
 </tr>
 <tr>
@@ -78,13 +72,13 @@ $(document).ready(function() {
 <tr>
   <td>教练 <label for="exampleInputName2" id="coach"></label>
   <td>
- 	<img src="/public/images/girl.jpg" name=v_coach_img id="v_coach_img">
+ 	<img src="/public/images/girl.jpg" name=v_coach_img id="v_coach_img" width="100" height="100">
   </td>
 </tr>
 <tr>
   <td>队长  <label for="exampleInputName2" id="captain"></label>
   <td>
- 	<img src="/public/images/girl.jpg" name=v_captain_img id="v_captain_img">
+ 	<img src="/public/images/girl.jpg" name=v_captain_img id="v_captain_img" width="100" height="100">
   </td>
 </tr>
 <tr>

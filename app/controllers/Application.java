@@ -3,10 +3,9 @@ package controllers;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-import play.i18n.Lang;
 import play.mvc.Controller;
 
 public class Application extends Controller {
@@ -14,13 +13,13 @@ public class Application extends Controller {
 	private static String token = "FSBAwx";
 	
     public static void index() {
-    	 // Î¢ÐÅ¼ÓÃÜÇ©Ãû  
+    	 // Î¢ï¿½Å¼ï¿½ï¿½ï¿½Ç©ï¿½ï¿½  
         String signature = params.get("signature");
-        // Ê±¼ä´Á  
+        // Ê±ï¿½ï¿½ï¿½  
         String timestamp = params.get("timestamp");  
-        // Ëæ»úÊý  
+        // ï¿½ï¿½ï¿½ï¿½ï¿½  
         String nonce = params.get("nonce");  
-        // Ëæ»ú×Ö·û´®  
+        // ï¿½ï¿½ï¿½ï¿½Ö·ï¿½  
         String echostr = params.get("echostr");  
     play.Logger.info("signature="+signature+" timestamp="+timestamp+" nonce="+nonce+" echostr="+echostr);
         if (checkSignature(signature, timestamp, nonce)) {
@@ -29,8 +28,14 @@ public class Application extends Controller {
     }
     
     public static void oauth2() {
-    	String code = params.get("code");
-    	renderText(code);
+    	Map<Integer, Integer> map = new HashMap<Integer, Integer>();  
+    	 String str="";
+    	for (Map.Entry<Integer, Integer> entry : map.entrySet()) {  
+    	  
+    	    str += "Key = " + entry.getKey() + ", Value = " + entry.getValue();  
+    	  
+    	} 
+    	renderText(str);
    }
 
     public static void list() {
@@ -43,7 +48,7 @@ public class Application extends Controller {
     }
     
     /** 
-     * ÑéÖ¤Ç©Ãû 
+     * ï¿½ï¿½Ö¤Ç©ï¿½ï¿½ 
      *  
      * @param signature 
      * @param timestamp 
@@ -52,7 +57,7 @@ public class Application extends Controller {
      */  
     public static boolean checkSignature(String signature, String timestamp, String nonce) {  
         String[] arr = new String[] { token, timestamp, nonce };  
-        // ½«token¡¢timestamp¡¢nonceÈý¸ö²ÎÊý½øÐÐ×ÖµäÐòÅÅÐò  
+        // ï¿½ï¿½tokenï¿½ï¿½timestampï¿½ï¿½nonceï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  
         Arrays.sort(arr);  
         StringBuilder content = new StringBuilder();  
         for (int i = 0; i < arr.length; i++) {  
@@ -63,7 +68,7 @@ public class Application extends Controller {
   
         try {  
             md = MessageDigest.getInstance("SHA-1");  
-            // ½«Èý¸ö²ÎÊý×Ö·û´®Æ´½Ó³ÉÒ»¸ö×Ö·û´®½øÐÐsha1¼ÓÃÜ  
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½Æ´ï¿½Ó³ï¿½Ò»ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½sha1ï¿½ï¿½ï¿½ï¿½  
             byte[] digest = md.digest(content.toString().getBytes());  
             tmpStr = byteToStr(digest);  
         } catch (NoSuchAlgorithmException e) {  
@@ -71,12 +76,12 @@ public class Application extends Controller {
         }  
   
         content = null;  
-        // ½«sha1¼ÓÃÜºóµÄ×Ö·û´®¿ÉÓësignature¶Ô±È£¬±êÊ¶¸ÃÇëÇóÀ´Ô´ÓÚÎ¢ÐÅ  
+        // ï¿½ï¿½sha1ï¿½ï¿½ï¿½Üºï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½signatureï¿½Ô±È£ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½Î¢ï¿½ï¿½  
         return tmpStr != null ? tmpStr.equals(signature.toUpperCase()) : false;  
     }  
   
     /** 
-     * ½«×Ö½ÚÊý×é×ª»»ÎªÊ®Áù½øÖÆ×Ö·û´® 
+     * ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ÎªÊ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ 
      *  
      * @param byteArray 
      * @return 
@@ -90,7 +95,7 @@ public class Application extends Controller {
     }  
   
     /** 
-     * ½«×Ö½Ú×ª»»ÎªÊ®Áù½øÖÆ×Ö·û´® 
+     * ï¿½ï¿½ï¿½Ö½ï¿½×ªï¿½ï¿½ÎªÊ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ 
      *  
      * @param mByte 
      * @return 

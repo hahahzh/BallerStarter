@@ -34,16 +34,19 @@
 <script type="text/javascript">
 $(document).ready(function() { 
 	successMsg = GetQueryString("successMsg");
+	var code = GetQueryString("code");
+	$("#code").val(code);
 	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
 		SetSMsg(successMsg);
 	}
+	loadInitPersonalData();
 	});
 	
 </script>
 
   </head>
-  <body role="document" onload="loadInitPersonalData();">
+  <body role="document">
 
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse text-center" style="background-color:#EE8A47;height:5px;">
@@ -53,20 +56,12 @@ $(document).ready(function() {
         
       </div>
 <div class="container theme-showcase" role="main">
-
+<input type="hidden" id="code" name="code" value="">
 <table class="table table-striped">
-<tr>
-  <td>
-  <button type="button" onclick="jumppage(111, 0, 0);" class="btn btn-default form-control" id="pEdit">编辑</button>
-  </td>
-  <td>
-	
-  </td>
-</tr>
 <tr>
   <td style="width: 50%;">头像</td>
   <td>
-  <img src="/public/images/boy.jpg" name=v_img_ch id="v_img_ch" >
+  <img src="/public/images/boy.jpg" name=v_img_ch id="v_img_ch"  width="100" height="100">
   </td>
 </tr>
 <tr>
@@ -191,7 +186,7 @@ $(document).ready(function() {
 </tr>
 <tr>
   <td>
-  <button type="button" onclick="personalEdit();" class="btn btn-default form-control" id="pEdit">编辑</button>
+  <button type="button" onclick="jumppage(111, 0, 0);" class="btn btn-default form-control" id="pEdit">编辑</button>
   </td>
   <td>
 	
