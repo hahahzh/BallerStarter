@@ -533,7 +533,7 @@ function loadInitTeamData(){
         			str+="体重: "+json.weight+" KG";
         			str+="</td>";
         			str+="<td>";
-        			str+="<img src='"+json.img_ch+"'>";
+        			str+="<img src='"+json.img_ch+"' width='100' height='100'>";
                 	str+="</td></tr>";
         		});
         		$("#t_v_members").append(str);
@@ -582,7 +582,7 @@ function loadEditTeamData(){
         			str+="体重: "+json.weight+" KG";
         			str+="</td>";
         			str+="<td>";
-        			str+="<img src='"+json.img_ch+"'>";
+        			str+="<img src='"+json.img_ch+"' width='100' height='100'>";
                 	str+="</td></tr>";
         		});
         		$("#t_e_members").append(str);
@@ -640,19 +640,72 @@ function loadInitGameData(){
         		str = "";
         		$.each(obj.results.teamlist, function(index, json) {
         			str+="<tr><td>";
-        			str+="球队名称: "+json.name;
+        			str+="球队名称: ";
+        			str+="<a href='/public/html5/game/team_view.html?tId="+json.tId+"' target='_blank'>";
+        			str+=json.name;
+        			str+="</a>";
         			str+="</br>";
         			str+="教练: "+json.coach;
         			str+="</br>";
         			str+="队长: "+json.captain;
         			str+="</td>";
         			str+="<td>";
-        			str+="<img src='"+json.logo+"'>";
+        			str+="<img src='"+json.logo+"' width='100' height='100'>";
                 	str+="</td></tr>";
         		});
         		$("#g_v_teams").append(str);
         	}else{
 //        		alert(obj.msg);
+        		findError(obj);
+        	}	
+        }
+    });
+}
+
+function loadGameTeamData(){
+	var data = {
+            tId:GetQueryString("tId")
+        };
+	$.ajax({
+        url: "/c/g/ggti",
+        type: "get",
+        data: data,
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	sessionStorage.setItem("sessionID", obj.session);
+        	
+        	if(obj.state==1){
+        		$("#v_img_t_logo").attr("src", obj.results.logo);
+        		$("#name").text(obj.results.name);
+        		$("#v_coach_img").attr("src", obj.results.coach_img);
+        		$("#coach").text(obj.results.coach);
+          		$("#v_captain_img").attr("src", obj.results.captain_img);
+        		$("#captain").text(obj.results.captain);
+        		$("#contact").text(obj.results.contact);
+        		$("#updated_at_ch").text(obj.results.updated_at_ch);
+        		
+        		str = "";
+        		$.each(obj.results.members, function(index, json) {
+        			str+="<tr><td>";
+        			str+="绰号: "+json.nickname;
+        			str+="</br>";
+        			str+="年龄: "+json.age;
+        			str+="</br>";
+        			str+="场上位置: "+json.job1;
+        			str+="</br>";
+        			str+="号码: "+json.number+" 号";
+        			str+="</br>";
+        			str+="身高: "+json.height+" CM";
+        			str+="</br>";
+        			str+="体重: "+json.weight+" KG";
+        			str+="</td>";
+        			str+="<td>";
+        			str+="<img src='"+json.img_ch+"' width='100' height='100'>";
+                	str+="</td></tr>";
+        		});
+        		$("#t_v_members").append(str);
+        	}else{
         		findError(obj);
         	}	
         }

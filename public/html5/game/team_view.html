@@ -35,103 +35,65 @@
 <script type="text/javascript">
 $(document).ready(function() { 
 	successMsg = GetQueryString("successMsg");
-	var code = GetQueryString("code");
-	$("#code").val(code);
 	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
-		
 		SetSMsg(successMsg);
 	}
-	}); 
+	});
 	
 </script>
   </head>
-  <body role="document" onload="loadInitGameData();">
+  <body role="document" onload="loadGameTeamData();">
 
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse text-center" style="background-color:#EE8A47;height:5px;">
-          <h5>赛事信息</h5>
+          <h5>球队信息</h5>
     </nav>
     <div class="alert alert-success" role="alert" id="gmsg">
         
       </div>
 <div class="container theme-showcase" role="main">
-<input type="hidden" id="gId"/>
-<input type="hidden" id="code" name="code" value=""> 
 <table class="table table-striped">
-<tr>
-  <td>
-  <button type="button" onclick="signup();" class="btn btn-default form-control" id="b_g_signup">我要报名</button>
-  </td>
-  <td>
-	
-  </td>
-</tr>
 <tr>
   <td style="width: 50%;">LOGO</td>
   <td>
-  <img src="/public/images/glogo.jpg" name=v_img_g_logo id="v_img_g_logo" width="100" height="100">
+  <img src="/public/images/girl.jpg" name=v_img_t_logo id="v_img_t_logo" width="100" height="100">
   </td>
 </tr>
 <tr>
-  <td>赛事名称</td>
+  <td>名称</td>
   <td>
  	<label for="exampleInputName2" id="name"></label>
   </td>
 </tr>
 <tr>
-  <td>介绍 <td>
- 	<label for="exampleInputName2" id="describtion"></label>
+  <td>教练 <label for="exampleInputName2" id="coach"></label>
+  <td>
+ 	<img src="/public/images/girl.jpg" name=v_coach_img id="v_coach_img" width="100" height="100">
   </td>
 </tr>
 <tr>
-  <td>比赛日程</td>
+  <td>队长  <label for="exampleInputName2" id="captain"></label>
   <td>
- 	<!-- <label for="exampleInputName2" id="schedule"></label> -->
- 	<a href="#" id="a_g_schedule" target="_blank">查看赛程</a>
+ 	<img src="/public/images/girl.jpg" name=v_captain_img id="v_captain_img" width="100" height="100">
   </td>
 </tr>
 <tr>
-  <td>报名开始日期</td>
+  <td>联系方式</td>
   <td>
- 	<label for="exampleInputName2" id="startSignUp"></label>
+ 	<label for="exampleInputName2" id="contact"></label>
   </td>
 </tr>
 <tr>
-  <td>报名截止日期</td>
+  <td>注册日期</td>
   <td>
- 	<label for="exampleInputName2" id="endSignUp"></label>
+ 	<label for="exampleInputName2" id="updated_at_ch"></label>
   </td>
 </tr>
 <tr>
-  <td>比赛开始日期</td>
-  <td>
- 	<label for="exampleInputName2" id="startDate"></label>
-  </td>
-</tr>
-<tr>
-  <td>比赛结束日期</td>
-  <td>
- 	<label for="exampleInputName2" id="endDate"></label>
-  </td>
-</tr>
 </table>
-<!-- 比赛结果 -->
-<table class="table table-striped" id="g_v_teams">
-<tr>
-  <td><a href="#" id="a_g_standings" target="_blank">排名</a></td>
-  <td><a href="#" id="a_g_results" target="_blank">赛果</a></td>
-</tr>
-</table>
-<!-- 球队信息 -->
-<table class="table table-striped">
-<tr>
-  <td>报名审核通过的球队</td>
-  <td>
-  </td>
-</tr>
-</table>
-<table class="table table-striped" id="g_v_teams">
+<!-- 球员信息 -->
+<table class="table table-striped" id="t_v_members">
 </table>
 </div>
 </body>

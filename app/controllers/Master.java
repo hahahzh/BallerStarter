@@ -89,7 +89,7 @@ public class Master extends Controller {
 	 */
 	@Before(unless={"checkDigit", "checkDigit2", "register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
 			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameInfo",
-			"getGameStandingsData","getGameResultsData"},priority=1)
+			"getGameStandingsData","getGameResultsData", "getGTeamInfo"},priority=1)
 	public static void validateSessionID(String code, @Required String z) {
 		play.Logger.info("validateSessionID start");
 		Session s = Session.find("bySessionID",z).first();
@@ -504,39 +504,66 @@ public class Master extends Controller {
 	}
 	
 	/**
-	 * 获取球队信息2
+	 * 获取球队信息1
 	 * 
 	 * @param z
 	 */
-	public static void getAllTeamList(@Required String z) {
-		
-		if (Validation.hasErrors()) {
-			renderFail("error_parameter_required");
-		}
-		
-		Session s = sessionCache.get();
-		if(s == null){
-			renderFail("session_expired");
-		}
+	public static void getGTeamInfo(Long tId) {
 				
-		List<Team> ts = Team.findAll();
-		
+		Team t = Team.findById(tId);
+		if(t == null)renderFail("error_team_notexist");
+				
 		JSONObject results = initResultJSON();
+	
+		if(t.logo != null && t.logo.exists()){
+			results.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + 100);
+		}else{
+			results.put("logo", TLOGO);
+		}
+		results.put("name", t.name);
+		if(t.coach.img_ch != null && t.coach.img_ch.exists()){
+			results.put("coach_img", "/c/download?id=" + t.coach.id + "&fileID=img_ch&entity=" + t.coach.getClass().getName() + "&z=" + 100);
+		}else if(!StringUtil.isEmpty(t.coach.headimgurl)){
+			results.put("coach_img", t.coach.headimgurl);
+		}else{
+			results.put("coach_img", BOY);
+		}
+		results.put("coach", t.coach==null?"":t.coach.name);
+		if(t.captain.img_ch != null && t.captain.img_ch.exists()){
+			results.put("captain_img", "/c/download?id=" + t.captain.id + "&fileID=img_ch&entity=" + t.captain.getClass().getName() + "&z=" + 100);
+		}else if(!StringUtil.isEmpty(t.captain.headimgurl)){
+			results.put("captain_img", t.captain.headimgurl);
+		}else{
+			results.put("captain_img", BOY);
+		}
+		results.put("captain", t.captain==null?"":t.captain.name);
+		results.put("contact", t.contact);
 		JSONArray datalist = initResultJSONArray();
-		if(ts.isEmpty() && ts.size() > 0){
+		if(t.members.size() >0){
 			JSONObject data = initResultJSON();
-			for(Team t:ts){
-				data.put("id", t.id);
-				if(t.logo != null && t.logo.exists()){
-					data.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + z);
-				}else{
-					data.put("logo", TLOGO);
+			for(Member m:t.members){
+				data.put("nickname", m.nickname);
+				data.put("number", m.number);
+				data.put("age", "");
+				if(m.birthday!=null){
+					data.put("age", (new Date().getYear() - m.birthday.getYear())+"");
 				}
-				data.put("name", t.name);
+				data.put("job1", m.job1==null?"":m.job1.full_name);
+				data.put("job2", m.job2==null?"":m.job2.full_name);
+				data.put("height", m.height);
+				data.put("weight", m.weight);
+				if(m.img_ch != null && m.img_ch.exists()){
+					data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + 100);
+				}else if(!StringUtil.isEmpty(m.headimgurl)){
+					data.put("img_ch", m.headimgurl);
+				}else{
+					data.put("img_ch", BOY);
+				}
 				datalist.add(data);
 			}
-			results.put("list", datalist);
 		}
+		results.put("members", datalist);
+		results.put("updated_at_ch", SDF_TO_DAY.format(t.updated_at_ch));
 		renderSuccess(results);
 	}
 	
@@ -650,6 +677,7 @@ public class Master extends Controller {
 			if(gas != null && gas.size() > 0){
 				JSONObject data = initResultJSON();
 				for(GameApproval ga:gas){
+					data.put("tId", ga.teams.id);
 					data.put("name", ga.teams.name);
 					data.put("coach", ga.teams.coach==null?"":ga.teams.coach.name);
 					data.put("captain", ga.teams.captain==null?"":ga.teams.captain.name);
