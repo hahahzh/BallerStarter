@@ -57,6 +57,7 @@ $(document).ready(function() {
       </div>
 <div class="container theme-showcase" role="main">
 <input type="hidden" id="code" name="code" value="">
+<div class="panel panel-default">
 <table class="table table-striped">
 <tr>
   <td style="width: 50%;">头像</td>
@@ -130,8 +131,13 @@ $(document).ready(function() {
  	<label for="exampleInputName2" id="specialty"></label>
   </td>
 </tr>
+</table>
+</div>
+
+<div class="panel panel-default">
+<table class="table table-striped">
 <tr>
-  <td>国籍</td>
+  <td style="width: 50%;">国籍</td>
   <td>
  	<label for="exampleInputName2" id="nationality"></label>
   </td>
@@ -184,16 +190,12 @@ $(document).ready(function() {
  	<label for="exampleInputName2" id="blood"></label>
   </td>
 </tr>
-<tr>
-  <td>
-  <button type="button" onclick="jumppage(111, 0, 0);" class="btn btn-default form-control" id="pEdit">编辑</button>
-  </td>
-  <td>
-	
-  </td>
-</tr>
 </table>
-
+</div>
+<br/><br/>
+<nav class="navbar-fixed-bottom" style="width:50%;margin:auto;">
+<button type="button" onclick="jumppage(111, 0, 0);" class="btn btn-default form-control" id="pEdit">编辑</button>
+</nav>
 </div>
 </body>
 </html>
