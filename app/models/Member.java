@@ -40,8 +40,6 @@ public class Member extends Model {
 	@MaxSize(10)
 	public String weight;
 	public Integer number;
-	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH) 
-	public Team team;
 	@MaxSize(10)
 	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
 	public Job job1;

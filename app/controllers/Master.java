@@ -38,6 +38,7 @@ import play.db.DB;
 import play.db.Model;
 import play.db.jpa.Blob;
 import play.db.jpa.GenericModel.JPAQuery;
+import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -89,7 +90,7 @@ public class Master extends Controller {
 	 */
 	@Before(unless={"checkDigit", "checkDigit2", "register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
 			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameInfo",
-			"getGameStandingsData","getGameResultsData", "getGTeamInfo"},priority=1)
+			"getGameStandingsData","getGameResultsData", "getGTeamInfo", "getGameList", "getTeamList"},priority=1)
 	public static void validateSessionID(String code, @Required String z) {
 		play.Logger.info("validateSessionID start");
 		Session s = Session.find("bySessionID",z).first();
@@ -241,9 +242,7 @@ public class Master extends Controller {
 		if(number != null){
 			m.number = number;
 		}
-		if(!StringUtil.isEmpty(team)){
-			m.team = Team.find("byName", team).first();
-		}
+
 		if(job1 != null){
 			m.job1 = Job.findById(job1);
 		}
@@ -308,7 +307,7 @@ public class Master extends Controller {
 		Member m = s.member;
 		play.Logger.info("getMemberInfo m="+m.toString());
 		JSONObject results = initResultJSON();
-	
+		results.put("pId", m.id);
 		results.put("name", m.name);
 		results.put("nickname", m.nickname);
 		results.put("birthday", m.birthday==null?"":SDF_TO_DAY.format(m.birthday));
@@ -318,7 +317,6 @@ public class Master extends Controller {
 		results.put("height", m.height);
 		results.put("weight", m.weight);
 		results.put("number", m.number);
-		results.put("team", m.team);
 		results.put("job1", m.job1==null?"":m.job1.full_name);
 		results.put("job2", m.job2==null?"":m.job2.full_name);
 		results.put("specialty", m.specialty);
@@ -504,7 +502,7 @@ public class Master extends Controller {
 	}
 	
 	/**
-	 * 获取球队信息1
+	 * 获取球队信息2
 	 * 
 	 * @param z
 	 */
@@ -568,6 +566,38 @@ public class Master extends Controller {
 	}
 	
 	/**
+	 * 获取球队信息 list
+	 * 
+	 * @param z
+	 */
+	public static void getTeamList(@Required Long pId) {
+				
+		List<Team> tl = JPA.em().createNativeQuery("select * from teams, teams_members where teams_members.members_id = "+pId+" and teams.id=teams_members.teams_id", Team.class).getResultList();
+				
+		JSONObject results = initResultJSON();
+		
+		if(tl != null && tl.size() > 0){
+			JSONArray datalist = initResultJSONArray();
+			for(Team t:tl){
+				JSONObject data = initResultJSON();
+				data.put("id", t.id);
+				data.put("name", t.name);
+				data.put("updated_at_ch", t.updated_at_ch);
+				if(t.logo != null && t.logo.exists()){
+					data.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + 100);
+				}else{
+					data.put("logo", TLOGO);
+				}
+				datalist.add(data);
+			}
+			results.put("teamlist", datalist);
+		}else{
+			renderFail("error_notadde_team");
+		}
+		renderSuccess(results);
+	}
+	
+	/**
 	 * 获取球队积分
 	 * 
 	 * @param z
@@ -625,8 +655,8 @@ public class Master extends Controller {
 		JSONObject results = initResultJSON();
 		JSONArray datalist = initResultJSONArray();
 		if(cs.isEmpty() && cs.size() > 0){
-			JSONObject data = initResultJSON();
 			for(Constellation c:cs){
+				JSONObject data = initResultJSON();
 				data.put("id", c.id);
 				data.put("name", c.name);
 				datalist.add(data);
@@ -637,18 +667,60 @@ public class Master extends Controller {
 	}
 	
 	/**
-	 * 获取赛事
+	 * 获取赛事列表
 	 * 
 	 * @param z
 	 * @throws ParseException
 	 */
-	public static void getGameInfo() throws ParseException {
+	public static void getGameList(Long pId) throws ParseException {
 		
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
 		}
 						
-		Game g = Game.find("isShow = 1 order by id desc").first();
+		List<Game> gl = null;
+		if(pId == null){
+			gl = Game.find("isShow = 1 order by id desc").fetch();	
+		}else{
+			List<Team> tl = JPA.em().createNativeQuery("select * from teams, teams_members where teams_members.members_id = "+pId+" and teams.id=teams_members.teams_id", Team.class).getResultList();
+			String tid ="";
+			for(Team t:tl)tid += t.id+",";
+			if(tid.length()>1)tid = tid.substring(0, tid.length()-2);
+			gl = JPA.em().createNativeQuery("select * from games, games_teams where games.id=games_teams.games_id and games_teams.teams_id in("+tid+")", Game.class).getResultList();
+		}
+		JSONObject results = initResultJSON();
+		
+		if(gl != null && gl.size() > 0){
+			JSONArray datalist = initResultJSONArray();
+			for(Game g:gl){
+				JSONObject data = initResultJSON();
+				data.put("id", g.id);
+				data.put("name", g.name);
+				data.put("startDate", g.startDate==null?"":SDF_TO_DAY.format(g.startDate));
+				data.put("startSignUp", g.startSignUp==null?"":SDF_TO_DAY.format(g.startSignUp));
+				data.put("state", g.state.name);
+				datalist.add(data);
+			}
+			results.put("gamelist", datalist);
+		}else{
+			renderFail("error_nothave_game");
+		}
+		renderSuccess(results);
+	}
+	
+	/**
+	 * 获取赛事
+	 * 
+	 * @param z
+	 * @throws ParseException
+	 */
+	public static void getGameInfo(@Required Long gId) throws ParseException {
+		
+		if (Validation.hasErrors()) {
+			renderFail("error_nothave_game");
+		}
+						
+		Game g = Game.findById(gId);
 		
 		JSONObject results = initResultJSON();
 		
@@ -666,7 +738,7 @@ public class Master extends Controller {
 			results.put("startSignUp", g.startSignUp==null?"":SDF_TO_DAY.format(g.startSignUp));
 			results.put("endSignUp", g.endSignUp==null?"":SDF_TO_DAY.format(g.endSignUp));
 			results.put("describtion", g.describtion);
-			if(DateUtil.intervalOfHour(new Date(), g.endSignUp) > 0){
+			if("E".equals(g.state.state) && DateUtil.intervalOfHour(new Date(), g.endSignUp) > 0){
 				results.put("isSignUp", 1);
 			}else{
 				results.put("isSignUp", 0);
@@ -1092,8 +1164,8 @@ public class Master extends Controller {
 			m.phone = phone;
 			m.pwd = pwd;
 			m.updated_at_ch = new Date();
-//			m._save();
-			setupWXInfo(m, code);
+			m._save();
+			if(!StringUtil.isEmpty(code))setupWXInfo(m, code);
 			//c.delete();
 			
 			Session s = new Session();

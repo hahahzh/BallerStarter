@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -31,6 +32,12 @@ public class Game extends Model {
 	public Date endSignUp;
 	public Integer tCount;
 	public Boolean isShow;
+	public String organizers;
+	public String sponsor;
+	public String place;
+	@Required
+	@ManyToOne(fetch=FetchType.EAGER,cascade=javax.persistence.CascadeType.REFRESH)
+	public GameState state;
 	@MaxSize(1000)
 	public String prize;
 	public String toString() {

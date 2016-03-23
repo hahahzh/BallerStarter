@@ -160,6 +160,8 @@ function loadInitPersonalData(){
         	var obj = jQuery.parseJSON(msg);
         	sessionStorage.setItem("sessionID", obj.session);
         	if(obj.state==1){
+        		$("#a_p_games").attr("href", "/public/html5/personal/game_view.html?pId="+obj.results.id);
+        		$("#a_p_teams").attr("href", "/public/html5/personal/team_view.html?pId="+obj.results.id);
         		$("#v_img_ch").attr("src", obj.results.img_ch);
         		$("#name").text(obj.results.name);
         		$("#nickname").text(obj.results.nickname);
@@ -611,8 +613,41 @@ function teamSubmit(){
 	sendRequest("/c/t/uti", "post", data, "text", 120, 3, 0);
 }
 
+function loadInitGameList(){
+	$.ajax({
+        url: "/c/g/ggl",
+        type: "get",
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		var n=1;
+        		str = "";
+        		$.each(obj.results.gamelist, function(index, json) {
+        			str+="<tr><td>";
+        			str+=n;
+        			str+="</td><td>";
+        			str+="<a href='/public/html5/game/info_view.html?gId="+json.id+"' target='_blank'>";
+        			str+=json.name;
+        			str+="</a>";
+        			str+="</td><td>";
+        			str+=json.state;
+        			str+="</td><td>";
+        			str+=json.startDate;
+                	str+="</td></tr>";
+        		});
+        		$("#g_l_games").append(str);
+        	}else{
+//        		alert(obj.msg);
+        		findError(obj);
+        	}	
+        }
+    });
+}
+
 function loadInitGameData(){
 	var data = {
+			gId:GetQueryString("gId")
         };
 	$.ajax({
         url: "/c/g/ggi",
@@ -648,9 +683,9 @@ function loadInitGameData(){
         			str+="<a href='/public/html5/game/team_view.html?tId="+json.tId+"' target='_blank'>";
         			str+=json.name;
         			str+="</a>";
-        			str+="</br>";
+        			str+="<br/>";
         			str+="教练: "+json.coach;
-        			str+="</br>";
+        			str+="<br/>";
         			str+="队长: "+json.captain;
         			str+="</td>";
         			str+="<td>";
