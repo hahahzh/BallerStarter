@@ -97,8 +97,8 @@ public class Master extends Controller {
 			String openID = getWXOpenID(code);
 			if(openID == null)renderFail("session_expired");
 			Member m = Member.find("byOpenID", openID).first();
-			play.Logger.info("validateSessionID m="+m.openID);
 			if(m == null)renderFail("session_expired");
+			play.Logger.info("validateSessionID m="+m.openID);
 			s = Session.find("member_openid=?",m.id).first();
 			if(s == null){
 				s = new Session();
@@ -297,7 +297,7 @@ public class Master extends Controller {
 	public static void getMemberInfo(String code, @Required String z) {
 		play.Logger.info("getMemberInfo start");
 //		if (Validation.hasErrors()) {
-//			renderFail("error_parameter_required");
+//			if(StringUtil.isEmpty(z))renderFail("session_expired");
 //		}
 		
 		Session s = sessionCache.get();

@@ -40,13 +40,13 @@ $(document).ready(function() {
 	if(successMsg != null && successMsg != ''){
 		SetSMsg(successMsg);
 	}
-	loadInitPersonalData();
+	
 	});
 	
 </script>
 
   </head>
-  <body role="document">
+  <body role="document" onload="loadInitPersonalData();">
 
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse text-center" style="background-color:#EE8A47;height:5px;">

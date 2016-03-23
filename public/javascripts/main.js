@@ -143,9 +143,12 @@ function sendRequest(url, method, data, dataType, forword, successMsg, repage){
 
 function loadInitPersonalData(){
 	var code = $("#code").val();
+	var s = sessionStorage.getItem("sessionID");
+
+	if(s == null)s="";
 	var data = {
 			code:code,
-            z:sessionStorage.getItem("sessionID")
+            z:s
         };
 	
 	$.ajax({
@@ -183,9 +186,10 @@ function loadInitPersonalData(){
             	$("#constellation").text(obj.results.constellation);
             	$("#blood").text(obj.results.blood);
         	}else{
-        		if(obj.msg == 'session_expired'){
+//        		if(obj.msg == 'session_expired'){
         			jumppage(11, 4, 110);
-        		}
+//        		}
+        			
         	}	
         }
     });
