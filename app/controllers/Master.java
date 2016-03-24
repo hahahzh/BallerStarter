@@ -75,7 +75,7 @@ public class Master extends Controller {
 	public static final int FIVE = 5;
 
 	private static final String appID= "wx245cd14422e15ae4";
-	private static final String AppSecret = "e65a573f636d429b9ef83c881b41af24";
+	private static final String AppSecret = "c1bf3b3c3e7430d3871e944f8e29f192";
 	private static String CODE = "";
 //	private static String urlCode = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="+appID+"&redirect_uri=http://m.ballerstarter.com/oauth2&response_type=code&scope=snsapi_userinfo&state=1"; 
 	private static String urlToken = "https://api.weixin.qq.com/sns/oauth2/access_token?appid="+appID+"&secret="+AppSecret+"&grant_type=authorization_code&code=";
@@ -514,13 +514,13 @@ public class Master extends Controller {
 		JSONObject results = initResultJSON();
 	
 		if(t.logo != null && t.logo.exists()){
-			results.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + 100);
+			results.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + 1);
 		}else{
 			results.put("logo", TLOGO);
 		}
 		results.put("name", t.name);
 		if(t.coach.img_ch != null && t.coach.img_ch.exists()){
-			results.put("coach_img", "/c/download?id=" + t.coach.id + "&fileID=img_ch&entity=" + t.coach.getClass().getName() + "&z=" + 100);
+			results.put("coach_img", "/c/download?id=" + t.coach.id + "&fileID=img_ch&entity=" + t.coach.getClass().getName() + "&z=" + 1);
 		}else if(!StringUtil.isEmpty(t.coach.headimgurl)){
 			results.put("coach_img", t.coach.headimgurl);
 		}else{
@@ -528,7 +528,7 @@ public class Master extends Controller {
 		}
 		results.put("coach", t.coach==null?"":t.coach.name);
 		if(t.captain.img_ch != null && t.captain.img_ch.exists()){
-			results.put("captain_img", "/c/download?id=" + t.captain.id + "&fileID=img_ch&entity=" + t.captain.getClass().getName() + "&z=" + 100);
+			results.put("captain_img", "/c/download?id=" + t.captain.id + "&fileID=img_ch&entity=" + t.captain.getClass().getName() + "&z=" + 1);
 		}else if(!StringUtil.isEmpty(t.captain.headimgurl)){
 			results.put("captain_img", t.captain.headimgurl);
 		}else{
@@ -551,7 +551,7 @@ public class Master extends Controller {
 				data.put("height", m.height);
 				data.put("weight", m.weight);
 				if(m.img_ch != null && m.img_ch.exists()){
-					data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + 100);
+					data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + 1);
 				}else if(!StringUtil.isEmpty(m.headimgurl)){
 					data.put("img_ch", m.headimgurl);
 				}else{
@@ -582,9 +582,9 @@ public class Master extends Controller {
 				JSONObject data = initResultJSON();
 				data.put("id", t.id);
 				data.put("name", t.name);
-				data.put("updated_at_ch", t.updated_at_ch);
+				data.put("updated_at_ch", SDF_TO_DAY.format(t.updated_at_ch));
 				if(t.logo != null && t.logo.exists()){
-					data.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + 100);
+					data.put("logo", "/c/download?id=" + t.id + "&fileID=logo&entity=" + t.getClass().getName() + "&z=" + 1);
 				}else{
 					data.put("logo", TLOGO);
 				}
@@ -685,7 +685,7 @@ public class Master extends Controller {
 			List<Team> tl = JPA.em().createNativeQuery("select * from teams, teams_members where teams_members.members_id = "+pId+" and teams.id=teams_members.teams_id", Team.class).getResultList();
 			String tid ="";
 			for(Team t:tl)tid += t.id+",";
-			if(tid.length()>1)tid = tid.substring(0, tid.length()-2);
+			if(tid.length()>1)tid = tid.substring(0, tid.length()-1);
 			gl = JPA.em().createNativeQuery("select * from games, games_teams where games.id=games_teams.games_id and games_teams.teams_id in("+tid+")", Game.class).getResultList();
 		}
 		JSONObject results = initResultJSON();
@@ -695,6 +695,7 @@ public class Master extends Controller {
 			for(Game g:gl){
 				JSONObject data = initResultJSON();
 				data.put("id", g.id);
+				data.put("logo", "/c/download?id=" + g.id + "&fileID=logo&entity=" + g.getClass().getName() + "&z=" + 1);
 				data.put("name", g.name);
 				data.put("startDate", g.startDate==null?"":SDF_TO_DAY.format(g.startDate));
 				data.put("startSignUp", g.startSignUp==null?"":SDF_TO_DAY.format(g.startSignUp));

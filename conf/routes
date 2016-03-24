@@ -24,6 +24,7 @@ GET     /oauth2                                 Application.oauth2
 *		/c/g/ggrd								Master.getGameResultsData
 *		/c/g/ggti								Master.getGTeamInfo
 *		/c/g/ggl								Master.getGameList
+*		/c/t/gtl								Master.getTeamList
 
 *       /c/download								Master.download
 

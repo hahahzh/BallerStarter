@@ -160,8 +160,9 @@ function loadInitPersonalData(){
         	var obj = jQuery.parseJSON(msg);
         	sessionStorage.setItem("sessionID", obj.session);
         	if(obj.state==1){
-        		$("#a_p_games").attr("href", "/public/html5/personal/game_view.html?pId="+obj.results.id);
-        		$("#a_p_teams").attr("href", "/public/html5/personal/team_view.html?pId="+obj.results.id);
+        		$("#a_p_games").attr("href", "/public/html5/personal/game_view.html?pId="+obj.results.pId);
+        		$("#a_p_teams").attr("href", "/public/html5/personal/team_view.html?pId="+obj.results.pId);
+        		$("#pId").val(obj.results.pId);
         		$("#v_img_ch").attr("src", obj.results.img_ch);
         		$("#name").text(obj.results.name);
         		$("#nickname").text(obj.results.nickname);
@@ -334,6 +335,72 @@ function personalSubmit(){
 	sendRequest("/c/p/umi", "post", data, "text", 110, 3, 0);
 }
 
+function loadPGameList(){
+	var data = {
+			pId:GetQueryString("pId")
+        };
+	$.ajax({
+        url: "/c/g/ggl",
+        data: data,
+        type: "get",
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		var n=1;
+        		str = "";
+        		$.each(obj.results.gamelist, function(index, json) {
+        			str+="<tr><td>";
+        			str+=n;
+        			str+="</td><td>";
+        			str+=json.name;
+        			str+="</td><td>";
+        			str+="<img src='"+json.logo+"' width='100' height='100'>";
+                	str+="</td></tr>";
+        		});
+        		$("#p_l_games").append(str);
+        	}else{
+//        		alert(obj.msg);
+        		findError(obj);
+        	}	
+        }
+    });
+}
+
+function loadPTeamList(){
+	var data = {
+			pId:GetQueryString("pId")
+        };
+	$.ajax({
+        url: "/c/t/gtl",
+        data: data,
+        type: "get",
+        dataType: "text",
+        success:function(msg){
+        	var obj = jQuery.parseJSON(msg);
+        	if(obj.state==1){
+        		var n=1;
+        		str = "";
+        		$.each(obj.results.teamlist, function(index, json) {
+        			str+="<tr><td>";
+        			str+=n;
+        			str+="</td><td>";
+        			str+=json.name;
+        			str+="</td><td>";
+        			str+="<img src='"+json.logo+"' width='100' height='100'>";
+        			str+="</td><td>";
+        			str+=json.updated_at_ch;
+                	str+="</td></tr>";
+        		});
+        		$("#p_l_teams").append(str);
+        	}else{
+//        		alert(obj.msg);
+        		findError(obj);
+        	}	
+        }
+    });
+}
+
 function findError(obj){
 	if(obj.msg == 'error_parameter_phone'){
 		SetErrSMsg(100);
@@ -361,6 +428,8 @@ function findError(obj){
 		SetErrSMsg(112);
 	}else if(obj.msg == 'error_nothave_game'){
 		SetErrSMsg(113);
+	}else if(obj.msg == 'error_notadde_team'){
+		SetErrSMsg(114);
 	} else {
 		SetErrSMsg(200);
 	}
@@ -484,6 +553,8 @@ function SetErrSMsg(code){
 		$("#gmsg").text("尚未创建球队!");
 	}else if(113 == code){
 		$("#gmsg").text("最近没有比赛!");
+	}else if(114 == code){
+		$("#gmsg").text("没有加入任何球队!");
 	}
 	
 	$("#gmsg").show();
