@@ -12,16 +12,12 @@
     <title>Baller Starter</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/public/stylesheets/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap theme -->
-    <link href="../../dist/css/bootstrap-theme.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="theme.css" rel="stylesheet">
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -40,13 +36,13 @@ $(document).ready(function() {
 	if(successMsg != null && successMsg != ''){
 		SetSMsg(successMsg);
 	}
-	
+	loadInitPersonalData();
 	});
 	
 </script>
 
   </head>
-  <body role="document" onload="loadInitPersonalData();">
+  <body role="document">
 
     <!-- Fixed navbar -->
     <nav class="navbar navbar-inverse text-center" style="background-color:#EE8A47;height:5px;">

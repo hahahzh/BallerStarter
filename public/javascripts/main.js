@@ -164,28 +164,28 @@ function loadInitPersonalData(){
         		$("#a_p_teams").attr("href", "/public/html5/personal/team_view.html?pId="+obj.results.pId);
         		$("#pId").val(obj.results.pId);
         		$("#v_img_ch").attr("src", obj.results.img_ch);
-        		$("#name").text(obj.results.name);
-        		$("#nickname").text(obj.results.nickname);
+        		$("#name").text(obj.results.name==null?'':obj.results.name);
+        		$("#nickname").text(obj.results.nickname==null?'':obj.results.nickname);
         		$("#birthday").text(obj.results.birthday);
-        		$("#gender").text(obj.results.gender);
-        		$("#nationality").text(obj.results.nationality);
-        		$("#region").text(obj.results.region);
-        		$("#height").text(obj.results.height+" CM");
-        		$("#weight").text(obj.results.weight+" KG");
-        		$("#number").text(obj.results.number+" 号");
+        		$("#gender").text(obj.results.gender==null?'':obj.results.gender);
+        		$("#nationality").text(obj.results.nationality==null?'':obj.results.nationality);
+        		$("#region").text(obj.results.region==null?'':obj.results.region);
+        		$("#height").text(obj.results.height==null?'':obj.results.height+" CM");
+        		$("#weight").text(obj.results.weight==null?'':obj.results.weight+" KG");
+        		$("#number").text(obj.results.number==null?'':obj.results.number+" 号");
         		$("#team").text(obj.results.team);
         		$("#job1").text(obj.results.job1);
         		$("#job2").text(obj.results.job2);
-        		$("#specialty").text(obj.results.specialty);
+        		$("#specialty").text(obj.results.specialty==null?'':obj.results.specialty);
         		if(obj.results.auth==1){
         			$("#auth").text("是");
         		}else{
         			$("#auth").text("否");
         		}
-        		$("#qq").text(obj.results.qq);
-        		$("#email").text(obj.results.email);
-        		$("#weixin").text(obj.results.weixin);
-            	$("#phone").text(obj.results.phone);
+        		$("#qq").text(obj.results.qq==null?'':obj.results.qq);
+        		$("#email").text(obj.results.email==null?'':obj.results.email);
+        		$("#weixin").text(obj.results.weixin==null?'':obj.results.weixin);
+            	$("#phone").text(obj.results.phone==null?'':obj.results.phone);
             	$("#constellation").text(obj.results.constellation);
             	$("#blood").text(obj.results.blood);
         	}else{
@@ -733,7 +733,7 @@ function loadInitGameData(){
         		$("#name").text(obj.results.name);
         		$("#describtion").text(obj.results.describtion);
         		//$("#schedule").text(obj.results.schedule);
-        		$("#a_g_schedule").attr("href", obj.results.schedule);
+        		$("#a_g_schedule").attr("href", obj.results.schedule==null?'':obj.results.schedule);
         		$("#startSignUp").text(obj.results.startSignUp);
         		$("#endSignUp").text(obj.results.endSignUp);
         		$("#startDate").text(obj.results.startDate);

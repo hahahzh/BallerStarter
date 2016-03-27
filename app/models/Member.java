@@ -24,7 +24,6 @@ public class Member extends Model {
 	@Hidden
 	public String openID;
 	public String pwd;
-	@Required
 	@MaxSize(20)
 	public String name;
 	@MaxSize(20)

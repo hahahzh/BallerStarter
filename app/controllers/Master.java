@@ -94,9 +94,13 @@ public class Master extends Controller {
 	public static void validateSessionID(String code, @Required String z) {
 		play.Logger.info("validateSessionID start");
 		Session s = Session.find("bySessionID",z).first();
+		play.Logger.info("validateSessionID z="+z);
 		if (s == null) {
 			String openID = getWXOpenID(code);
-			if(openID == null)renderFail("session_expired");
+			if(openID == null){
+				play.Logger.info("openID=null");	
+				renderFail("session_expired");
+			}
 			Member m = Member.find("byOpenID", openID).first();
 			if(m == null)renderFail("session_expired");
 			play.Logger.info("validateSessionID m="+m.openID);
@@ -110,6 +114,7 @@ public class Master extends Controller {
 			}
 			play.Logger.info("validateSessionID s="+s.member.toString());
 		}
+		play.Logger.info("validateSessionID set s="+s.member.toString());
 		sessionCache.set(s);
 		play.Logger.info("validateSessionID end");
 	}
@@ -119,9 +124,12 @@ public class Master extends Controller {
 		String rToken = HttpTool.getHttpInputStream(urlToken+code);
 		play.Logger.info("getWXOpenID rToken="+rToken);
 		JSONObject jsonToken = JSONObject.fromObject(rToken);
+		play.Logger.info("jsonToken m="+jsonToken);
 		if(jsonToken.containsKey("openid")){
+			play.Logger.info("jsonToken m="+jsonToken);
 			return jsonToken.getString("openid");
 		}else{
+			play.Logger.info("jsonToken m=null");
 			return null;
 		}
 	}
@@ -308,18 +316,18 @@ public class Master extends Controller {
 		play.Logger.info("getMemberInfo m="+m.toString());
 		JSONObject results = initResultJSON();
 		results.put("pId", m.id);
-		results.put("name", m.name);
-		results.put("nickname", m.nickname);
+		results.put("name", m.name+"");
+		results.put("nickname", m.nickname+"");
 		results.put("birthday", m.birthday==null?"":SDF_TO_DAY.format(m.birthday));
-		results.put("gender", m.gender);
-		results.put("nationality", m.nationality);
-		results.put("region", m.region);
-		results.put("height", m.height);
-		results.put("weight", m.weight);
-		results.put("number", m.number);
+		results.put("gender", m.gender+"");
+		results.put("nationality", m.nationality+"");
+		results.put("region", m.region+"");
+		results.put("height", m.height+"");
+		results.put("weight", m.weight+"");
+		results.put("number", m.number+"");
 		results.put("job1", m.job1==null?"":m.job1.full_name);
 		results.put("job2", m.job2==null?"":m.job2.full_name);
-		results.put("specialty", m.specialty);
+		results.put("specialty", m.specialty+"");
 		if(m.img_ch != null && m.img_ch.exists()){
 			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
 		}else{
@@ -332,13 +340,13 @@ public class Master extends Controller {
 			}
 		}
 		results.put("auth", m.isAuth);
-		results.put("qq", m.qq);
-		results.put("email", m.email);
-		results.put("phone", m.phone);
-		results.put("weixin", m.weixin);
+		results.put("qq", m.qq+"");
+		results.put("email", m.email+"");
+		results.put("phone", m.phone+"");
+		results.put("weixin", m.weixin+"");
 		results.put("constellation", m.constellation==null?"":m.constellation.name);
 		results.put("blood", m.blood==null?"":m.blood.name);
-		results.put("updated_at_ch", m.updated_at_ch);
+		results.put("updated_at_ch", m.updated_at_ch+"");
 		play.Logger.info("getMemberInfo"+results.toString());
 		play.Logger.info("getMemberInfo end");
 		renderSuccess(results);
@@ -944,7 +952,7 @@ public class Master extends Controller {
 					m.gender = "女";
 					break;
 				default:
-					m.gender = "未知";
+					m.gender = "";
 					break;
 				}
 				m.region = jsonWX.getString("province")+" "+jsonWX.getString("city");
@@ -1160,7 +1168,7 @@ public class Master extends Controller {
 			}
 	
 			m = new Member();
-			m.name = "小明";
+			m.name = "";
 			m.isAuth = false;
 			m.phone = phone;
 			m.pwd = pwd;
@@ -1466,6 +1474,7 @@ public class Master extends Controller {
 		Session s = sessionCache.get();
 		if(s != null && !StringUtil.isEmpty(s.sessionID))jsonDoc.put("session", s.sessionID);
 		jsonDoc.put("results",results);
+		response.setHeader("Access-Control-Allow-Origin", "*");
 		renderJSON(jsonDoc.toString());
 	}
 
@@ -1475,6 +1484,7 @@ public class Master extends Controller {
 		Session s = sessionCache.get();
 		if(s != null && !StringUtil.isEmpty(s.sessionID))jsonDoc.put("session", s.sessionID);
 		jsonDoc.put("msg", Messages.get(key));
+		response.setHeader("Access-Control-Allow-Origin", "*");
 		renderJSON(jsonDoc.toString());
 	}
 

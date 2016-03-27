@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import play.mvc.Controller;
+import utils.StringUtil;
 
 public class Application extends Controller {
 
@@ -20,6 +21,7 @@ public class Application extends Controller {
         // �����  
         String nonce = params.get("nonce");  
         // ����ַ�  
+        if(StringUtil.isEmpty(signature))render();
         String echostr = params.get("echostr");  
     play.Logger.info("signature="+signature+" timestamp="+timestamp+" nonce="+nonce+" echostr="+echostr);
         if (checkSignature(signature, timestamp, nonce)) {
@@ -55,7 +57,7 @@ public class Application extends Controller {
      * @param nonce 
      * @return 
      */  
-    public static boolean checkSignature(String signature, String timestamp, String nonce) {  
+    public static boolean checkSignature(String signature, String timestamp, String nonce) {
         String[] arr = new String[] { token, timestamp, nonce };  
         // ��token��timestamp��nonce�����������ֵ�������  
         Arrays.sort(arr);  
