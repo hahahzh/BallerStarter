@@ -438,8 +438,8 @@ public class Master extends Controller {
 
 		Session s = sessionCache.get();
 		
-		Team t = Team.find("byCoach", s.member).first();
-		if(t == null)Team.find("byCaptain", s.member).first();
+		Team t = Team.find("coach_id=?", s.member.id).first();
+		if(t == null)Team.find("captain_id=?", s.member.id).first();
 		if(t == null){
 			t = new Team();
 			t.updated_at_ch = new Date();
@@ -457,9 +457,9 @@ public class Master extends Controller {
 			if(!StringUtil.isEmpty(coach)){
 				t.coach = Member.find("byName", coach).first();
 			}
-			if(!StringUtil.isEmpty(captain)){
-				t.captain = Member.find("byName", captain).first();
-			}
+//			if(!StringUtil.isEmpty(captain)){
+				t.captain = s.member;//Member.find("byName", captain).first();
+//			}
 			if(!StringUtil.isEmpty(contact)){
 				t.contact = contact;
 			}
@@ -496,8 +496,8 @@ public class Master extends Controller {
 			renderFail("session_expired");
 		}
 				
-		Team t = Team.find("byCoach", s.member).first();
-		if(t == null)Team.find("byCaptain", s.member).first();
+		Team t = Team.find("captain_id=?", s.member.id).first();
+		if(t==null)t = Team.find("coach_id=?", s.member.id).first();
 		if(t == null)renderFail("error_team_notexist");
 				
 		JSONObject results = initResultJSON();
