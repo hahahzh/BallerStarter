@@ -25,6 +25,7 @@ GET     /oauth2                                 Application.oauth2
 *		/c/g/ggti								Master.getGTeamInfo
 *		/c/g/ggl								Master.getGameList
 *		/c/t/gtl								Master.getTeamList
+*		/c/p/gpmi								Master.getPubMemberInfo
 
 *       /c/download								Master.download
 

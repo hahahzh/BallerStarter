@@ -142,17 +142,27 @@ function sendRequest(url, method, data, dataType, forword, successMsg, repage){
 
 
 function loadInitPersonalData(){
+	var data, url;
 	var code = $("#code").val();
 	var s = sessionStorage.getItem("sessionID");
-
 	if(s == null)s="";
-	var data = {
-			code:code,
-            z:s
-        };
+	
+	var pId = GetQueryString("pId");
+	if(pId=null){
+		data = {
+				pId:pId
+	        };
+		url = "/c/p/gpmi";
+	}else{
+		data = {
+				code:code,
+	            z:s
+	        };
+		url = "/c/p/gmi";
+	}
 	
 	$.ajax({
-        url: "/c/p/gmi",
+        url: url,
         type: "get",
         data: data,
         dataType: "text",
@@ -588,12 +598,14 @@ function loadInitTeamData(){
         	
         	if(obj.state==1){
         		$("#v_img_t_logo").attr("src", obj.results.logo);
-        		$("#name").text(obj.results.name);
+        		$("#name").text(obj.results.name==null?'':obj.results.name);
         		$("#v_coach_img").attr("src", obj.results.coach_img);
-        		$("#coach").text(obj.results.coach);
+        		$("#coach").text(obj.results.coach==null?'':obj.results.coach);
+        		$("#coach").attr("href","/public/html5/personal/pubinfo_view.html?pId="+obj.results.coach_id);
           		$("#v_captain_img").attr("src", obj.results.captain_img);
-        		$("#captain").text(obj.results.captain);
-        		$("#contact").text(obj.results.contact);
+        		$("#captain").text(obj.results.captain==null?'':obj.results.captain);
+        		$("#captain").attr("href","/public/html5/personal/pubinfo_view.html?pId="+obj.results.coach_id);
+        		$("#contact").text(obj.results.contact==null?'':obj.results.contact);
         		$("#updated_at_ch").text(obj.results.updated_at_ch);
         		
         		str = "";
@@ -603,11 +615,11 @@ function loadInitTeamData(){
         			str+="</br>";
         			str+="场上位置: "+json.job1;
         			str+="</br>";
-        			str+="号码: "+json.number+" 号";
+        			str+="号码: "+(json.number==null?'':json.number+" 号");
         			str+="</br>";
-        			str+="身高: "+json.height+" CM";
+        			str+="身高: "+(json.height==null?'':json.height+" CM");
         			str+="</br>";
-        			str+="体重: "+json.weight+" KG";
+        			str+="体重: "+(json.weight==null?'':json.weight+" KG");
         			str+="</td>";
         			str+="<td>";
         			str+="<img src='"+json.img_ch+"' width='100' height='100'>";
@@ -652,11 +664,11 @@ function loadEditTeamData(){
         			str+="</br>";
         			str+="场上位置: "+json.job1;
         			str+="</br>";
-        			str+="号码: "+json.number+" 号";
+        			str+="号码: "+(json.number==null?'':json.number+" 号");
         			str+="</br>";
-        			str+="身高: "+json.height+" CM";
+        			str+="身高: "+(json.height==null?'':json.height+" CM");
         			str+="</br>";
-        			str+="体重: "+json.weight+" KG";
+        			str+="体重: "+(json.weight==null?'':json.weight+" KG");
         			str+="</td>";
         			str+="<td>";
         			str+="<img src='"+json.img_ch+"' width='100' height='100'>";
@@ -804,11 +816,11 @@ function loadGameTeamData(){
         			str+="</br>";
         			str+="场上位置: "+json.job1;
         			str+="</br>";
-        			str+="号码: "+json.number+" 号";
+        			str+="号码: "+(json.number==null?'':json.number+" 号");
         			str+="</br>";
-        			str+="身高: "+json.height+" CM";
+        			str+="身高: "+(json.height==null?'':json.height+" CM");
         			str+="</br>";
-        			str+="体重: "+json.weight+" KG";
+        			str+="体重: "+(json.weight==null?'':json.weight+" KG");
         			str+="</td>";
         			str+="<td>";
         			str+="<img src='"+json.img_ch+"' width='100' height='100'>";

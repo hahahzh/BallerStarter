@@ -169,8 +169,11 @@ var popUpCal = {
 	selectDate: function(Input) {
 		if (!Input) var Input = this.input;
 		this.hideCalendar(this.speed);
-		if (this.timeSeparators && this.timeSeparators.length > 1) Input.val(this.formatDate(this.selectedDay, this.selectedMonth, this.selectedYear, this.selectedHour, this.selectedMinute));
-		else Input.val(this.formatDate(this.selectedDay, this.selectedMonth, this.selectedYear));
+		if (this.timeSeparators && this.timeSeparators.length > 1) {
+			Input.val(this.formatDate(this.selectedDay, this.selectedMonth, this.selectedYear, this.selectedHour, this.selectedMinute)+":00");
+		}else{
+			Input.val(this.formatDate(this.selectedDay, this.selectedMonth, this.selectedYear));
+		} 
 	},
 	
 	/* Construct and display the calendar. */

@@ -90,7 +90,7 @@ public class Master extends Controller {
 	 */
 	@Before(unless={"checkDigit", "checkDigit2", "register", "login", "sendResetPasswordMail", "sendResetPasswordSMS",
 			"download",	"getRWatchInfo", "syncTime", "receiver_new","receiverPhysiological", "getGameInfo",
-			"getGameStandingsData","getGameResultsData", "getGTeamInfo", "getGameList", "getTeamList"},priority=1)
+			"getGameStandingsData","getGameResultsData", "getGTeamInfo", "getGameList", "getTeamList", "getPubMemberInfo"},priority=1)
 	public static void validateSessionID(String code, @Required String z) {
 		play.Logger.info("validateSessionID start");
 		Session s = Session.find("bySessionID",z).first();
@@ -333,7 +333,48 @@ public class Master extends Controller {
 		}else{
 			if(!StringUtil.isEmpty(m.headimgurl)){
 				results.put("img_ch", m.headimgurl);
-			}else if(m.gender == null){
+			}else if(m.gender == null || "男".equals(m.gender)){
+				results.put("img_ch", BOY);
+			}else{
+				results.put("img_ch", GIRL);
+			}
+		}
+		results.put("auth", m.isAuth);
+		results.put("qq", m.qq+"");
+		results.put("email", m.email+"");
+		results.put("phone", m.phone+"");
+		results.put("weixin", m.weixin+"");
+		results.put("constellation", m.constellation==null?"":m.constellation.name);
+		results.put("blood", m.blood==null?"":m.blood.name);
+		results.put("updated_at_ch", m.updated_at_ch+"");
+		play.Logger.info("getMemberInfo"+results.toString());
+		play.Logger.info("getMemberInfo end");
+		renderSuccess(results);
+	}
+	
+	public static void getPubMemberInfo(Long pId) {
+		Member m = Member.findById(pId);
+		play.Logger.info("getMemberInfo m="+m.toString());
+		JSONObject results = initResultJSON();
+		results.put("pId", m.id);
+		results.put("name", m.name+"");
+		results.put("nickname", m.nickname+"");
+		results.put("birthday", m.birthday==null?"":SDF_TO_DAY.format(m.birthday));
+		results.put("gender", m.gender+"");
+		results.put("nationality", m.nationality+"");
+		results.put("region", m.region+"");
+		results.put("height", m.height+"");
+		results.put("weight", m.weight+"");
+		results.put("number", m.number+"");
+		results.put("job1", m.job1==null?"":m.job1.full_name);
+		results.put("job2", m.job2==null?"":m.job2.full_name);
+		results.put("specialty", m.specialty+"");
+		if(m.img_ch != null && m.img_ch.exists()){
+			results.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + 1);
+		}else{
+			if(!StringUtil.isEmpty(m.headimgurl)){
+				results.put("img_ch", m.headimgurl);
+			}else if(m.gender == null || "男".equals(m.gender)){
 				results.put("img_ch", BOY);
 			}else{
 				results.put("img_ch", GIRL);
@@ -474,6 +515,7 @@ public class Master extends Controller {
 		}else{
 			results.put("coach_img", BOY);
 		}
+		results.put("coach_id", t.coach==null?"":t.coach.id);
 		results.put("coach", t.coach==null?"":t.coach.name);
 		if(t.captain.img_ch != null && t.captain.img_ch.exists()){
 			results.put("captain_img", "/c/download?id=" + t.captain.id + "&fileID=img_ch&entity=" + t.captain.getClass().getName() + "&z=" + z);
@@ -482,18 +524,19 @@ public class Master extends Controller {
 		}else{
 			results.put("captain_img", BOY);
 		}
+		results.put("captain_id", t.captain==null?"":t.captain.id);
 		results.put("captain", t.captain==null?"":t.captain.name);
 		results.put("contact", t.contact);
 		JSONArray datalist = initResultJSONArray();
 		if(t.members.size() >0){
 			JSONObject data = initResultJSON();
 			for(Member m:t.members){
-				data.put("name", m.name);
-				data.put("number", m.number);
+				data.put("name", m.name+"");
+				data.put("number", m.number+"");
 				data.put("job1", m.job1==null?"":m.job1.full_name);
 				data.put("job2", m.job2==null?"":m.job2.full_name);
-				data.put("height", m.height);
-				data.put("weight", m.weight);
+				data.put("height", m.height+"");
+				data.put("weight", m.weight+"");
 				if(m.img_ch != null && m.img_ch.exists()){
 					data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + z);
 				}else if(!StringUtil.isEmpty(m.headimgurl)){
@@ -548,16 +591,16 @@ public class Master extends Controller {
 		if(t.members.size() >0){
 			JSONObject data = initResultJSON();
 			for(Member m:t.members){
-				data.put("nickname", m.nickname);
-				data.put("number", m.number);
+				data.put("nickname", m.nickname+"");
+				data.put("number", m.number+"");
 				data.put("age", "");
 				if(m.birthday!=null){
 					data.put("age", (new Date().getYear() - m.birthday.getYear())+"");
 				}
 				data.put("job1", m.job1==null?"":m.job1.full_name);
 				data.put("job2", m.job2==null?"":m.job2.full_name);
-				data.put("height", m.height);
-				data.put("weight", m.weight);
+				data.put("height", m.height+"");
+				data.put("weight", m.weight+"");
 				if(m.img_ch != null && m.img_ch.exists()){
 					data.put("img_ch", "/c/download?id=" + m.id + "&fileID=img_ch&entity=" + m.getClass().getName() + "&z=" + 1);
 				}else if(!StringUtil.isEmpty(m.headimgurl)){

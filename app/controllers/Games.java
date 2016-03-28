@@ -30,6 +30,12 @@ public class Games extends CRUD {
 	        if(params.get("object.endDate")!=null){
 	        	object.endDate = DateUtil.reverse2Date(params.get("object.endDate")+":00");
 	        }
+	        if(params.get("object.startSignUp")!=null){
+	        	object.startSignUp = DateUtil.reverse2Date(params.get("object.startSignUp")+":00");
+	        }
+	        if(params.get("object.endSignUp")!=null){
+	        	object.endSignUp = DateUtil.reverse2Date(params.get("object.endSignUp")+":00");
+	        }
 	        Set<String> s =params.data.keySet();
 	        Iterator<String> i = s.iterator();
 	        while(i.hasNext()){
@@ -69,7 +75,6 @@ public class Games extends CRUD {
 	        notFoundIfNull(type);
 	        Game object = Game.findById(Long.parseLong(id));
 	        notFoundIfNull(object);
-	        Binder.bindBean(params.getRootParamNode(), "object", object);
 	        if(params.get("object.startDate")!=null){
 	        	object.startDate = DateUtil.reverse2Date(params.get("object.startDate")+":00");
 	        }
@@ -82,6 +87,7 @@ public class Games extends CRUD {
 	        if(params.get("object.endSignUp")!=null){
 	        	object.endSignUp = DateUtil.reverse2Date(params.get("object.endSignUp")+":00");
 	        }
+	        Binder.bindBean(params.getRootParamNode(), "object", object);
 	        validation.valid(object);
 	        if (validation.hasErrors()) {
 	            renderArgs.put("error", play.i18n.Messages.get("crud.hasErrors"));
