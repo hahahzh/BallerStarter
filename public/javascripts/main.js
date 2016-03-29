@@ -142,25 +142,26 @@ function sendRequest(url, method, data, dataType, forword, successMsg, repage){
 
 
 function loadInitPersonalData(){
-	var data, url;
+	var data;
+	var url;
 	var code = $("#code").val();
 	var s = sessionStorage.getItem("sessionID");
 	if(s == null)s="";
 	
 	var pId = GetQueryString("pId");
-	if(pId=null){
-		data = {
-				pId:pId
-	        };
-		url = "/c/p/gpmi";
-	}else{
+	
+	if(pId==null || pId==''){
 		data = {
 				code:code,
 	            z:s
 	        };
 		url = "/c/p/gmi";
+	}else{
+		data = {
+				pId:pId
+	        };
+		url = "/c/p/gpmi";
 	}
-	
 	$.ajax({
         url: url,
         type: "get",
@@ -440,6 +441,8 @@ function findError(obj){
 		SetErrSMsg(113);
 	}else if(obj.msg == 'error_notadde_team'){
 		SetErrSMsg(114);
+	}else if(obj.msg == 'error_team_su_exist'){
+		SetErrSMsg(115);
 	} else {
 		SetErrSMsg(200);
 	}
@@ -466,6 +469,7 @@ function jumppage(page, smsg, repage){
 	var teamcoachpage = "/public/html5/team/info_edit_coach.html"+successMsg;
 	var teamcaptainpage = "/public/html5/team/info_edit_captain.html"+successMsg;
 	var gameviewpage = "/public/html5/game/info_view.html"+successMsg;
+	var gamelistpage = "/public/html5/game/info_list.html"+successMsg;
 	switch(page){
 	case 10:
 		window.location = regpage;
@@ -502,6 +506,9 @@ function jumppage(page, smsg, repage){
 		break;
 	case 130:
 		window.location = gameviewpage;
+		break;
+	case 133:
+		window.location = gamelistpage;
 		break;
 	default:
 	}
@@ -565,6 +572,8 @@ function SetErrSMsg(code){
 		$("#gmsg").text("最近没有比赛!");
 	}else if(114 == code){
 		$("#gmsg").text("没有加入任何球队!");
+	}else if(115 == code){
+		$("#gmsg").text("球队已经报名!");
 	}
 	
 	$("#gmsg").show();
@@ -604,7 +613,7 @@ function loadInitTeamData(){
         		$("#coach").attr("href","/public/html5/personal/pubinfo_view.html?pId="+obj.results.coach_id);
           		$("#v_captain_img").attr("src", obj.results.captain_img);
         		$("#captain").text(obj.results.captain==null?'':obj.results.captain);
-        		$("#captain").attr("href","/public/html5/personal/pubinfo_view.html?pId="+obj.results.coach_id);
+        		$("#captain").attr("href","/public/html5/personal/pubinfo_view.html?pId="+obj.results.captain_id);
         		$("#contact").text(obj.results.contact==null?'':obj.results.contact);
         		$("#updated_at_ch").text(obj.results.updated_at_ch);
         		
@@ -836,7 +845,7 @@ function loadGameTeamData(){
 
 function signup(){
 	if(sessionStorage.getItem("sessionID")==null||sessionStorage.getItem("sessionID")==''){
-		jumppage(11, 4, 130);
+		jumppage(11, 4, 133);
 		return;
 	}
 	if(confirm("确认要报名吗?")){
@@ -844,8 +853,27 @@ function signup(){
 		var data = {
 	            gId:id,
 	            z:sessionStorage.getItem("sessionID")
-	        };
-		sendRequest("/c/g/su", "get", data, "text", 130, 5, 130);
+		    };
+		$.ajax({
+	        url: "/c/g/su",
+	        type: "get",
+	        data: data,
+	        dataType: "text",
+	        success:function(msg){
+	        	var obj = jQuery.parseJSON(msg);
+	        	if(obj.session != null && obj.session != ''){
+	    			sessionStorage.setItem("sessionID", obj.session);
+	    		}
+	        	if(obj.state==1){
+	        		SetSMsg(5);
+	        	}else{
+	        		findError(obj);
+	        		if(obj.msg == 'session_expired'){
+	        			jumppage(11, 4, 133);
+	        		}
+	        	}
+	        }
+	    });
     }else{
         return;
     }
@@ -891,7 +919,7 @@ function loadGameStandingsData(){
         		$("#g_v_standings").append(str);
         	}else{
         		if(obj.msg == 'error_parameter_required'){
-        			jumppage(130, '0', 0);
+        			jumppage(133, '0', 0);
         		}
         	}	
         }
