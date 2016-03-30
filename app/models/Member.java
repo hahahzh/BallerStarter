@@ -66,7 +66,7 @@ public class Member extends Model {
 	public String headimgurl;
 	
 	public String toString() {
-		return name;
+		return name+" : "+phone;
 	}
 
 }

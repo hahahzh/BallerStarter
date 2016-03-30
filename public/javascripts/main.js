@@ -368,6 +368,7 @@ function loadPGameList(){
         			str+="</td><td>";
         			str+="<img src='"+json.logo+"' width='100' height='100'>";
                 	str+="</td></tr>";
+                	n++;
         		});
         		$("#p_l_games").append(str);
         	}else{
@@ -402,6 +403,7 @@ function loadPTeamList(){
         			str+="</td><td>";
         			str+=json.updated_at_ch;
                 	str+="</td></tr>";
+                	n++;
         		});
         		$("#p_l_teams").append(str);
         	}else{
@@ -727,6 +729,7 @@ function loadInitGameList(){
         			str+="</td><td>";
         			str+=json.startDate;
                 	str+="</td></tr>";
+                	n++;
         		});
         		$("#g_l_games").append(str);
         	}else{
