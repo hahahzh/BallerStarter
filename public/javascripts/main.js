@@ -449,6 +449,10 @@ function findError(obj){
 		SetErrSMsg(116);
 	}else if(obj.msg == 'error_parameter_date'){
 		SetErrSMsg(117);
+	}else if(obj.msg == 'error_parameter_pname'){
+		SetErrSMsg(118);
+	}else if(obj.msg == 'error_parameter_pnickname'){
+		SetErrSMsg(119);
 	} else {
 		SetErrSMsg(200);
 	}
@@ -584,6 +588,10 @@ function SetErrSMsg(code){
 		$("#gmsg").text("请填写球队名称!");
 	}else if(117 == code){
 		$("#gmsg").text("日期格式错误 例:1990-01-01");
+	}else if(118 == code){
+		$("#gmsg").text("姓名不能为空!");
+	}else if(119 == code){
+		$("#gmsg").text("绰号已被占用，请重新填写!");
 	}
 	
 	$("#gmsg").show();
@@ -727,6 +735,7 @@ function loadInitGameList(){
         dataType: "text",
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
+        	sessionStorage.setItem("sessionID", obj.session);
         	if(obj.state==1){
         		var n=1;
         		str = "";
@@ -755,7 +764,8 @@ function loadInitGameList(){
 
 function loadInitGameData(){
 	var data = {
-			gId:GetQueryString("gId")
+			gId:GetQueryString("gId"),
+			z:sessionStorage.getItem("sessionID")
         };
 	$.ajax({
         url: "/c/g/ggi",
@@ -764,6 +774,7 @@ function loadInitGameData(){
         dataType: "text",
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);
+        	
         	if(obj.state==1){
         		$("#gId").val(obj.results.id);
         		$("#v_img_g_logo").attr("src", obj.results.logo);

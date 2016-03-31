@@ -32,7 +32,8 @@
 <script type="text/javascript">
 $(document).ready(function() { 
 	successMsg = GetQueryString("successMsg");
-
+	var code = GetQueryString("code");
+	$("#code").val(code);
 	$("#gmsg").hide();
 	if(successMsg != null && successMsg != ''){
 		
@@ -45,7 +46,7 @@ $(document).ready(function() {
   <body role="document" onload="loadInitGameList();">
 
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse text-center" style="background-color:#EE8A47;height:5px;">
+    <nav class="navbar navbar-inverse text-center" style="background-color:#EF823A;">
           <h5>赛事信息 列表</h5>
     </nav>
     <div class="alert alert-success" role="alert" id="gmsg">

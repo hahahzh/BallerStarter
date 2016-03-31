@@ -225,8 +225,12 @@ public class Master extends Controller {
 		}
 		if(!StringUtil.isEmpty(name)){
 			m.name = name;
+		}else{
+			renderFail("error_parameter_pname");
 		}
 		if(!StringUtil.isEmpty(nickname)){
+			List<Member> mls = Member.find("nickname=? and id<>?", nickname, m.id).fetch();
+			if(mls != null && mls.size()>0)renderFail("error_parameter_pnickname");
 			m.nickname = nickname;
 		}
 		if(!StringUtil.isEmpty(birthday)){
