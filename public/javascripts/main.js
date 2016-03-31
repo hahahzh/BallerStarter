@@ -445,6 +445,10 @@ function findError(obj){
 		SetErrSMsg(114);
 	}else if(obj.msg == 'error_team_su_exist'){
 		SetErrSMsg(115);
+	}else if(obj.msg == 'error_teamname_null'){
+		SetErrSMsg(116);
+	}else if(obj.msg == 'error_parameter_date'){
+		SetErrSMsg(117);
 	} else {
 		SetErrSMsg(200);
 	}
@@ -576,6 +580,10 @@ function SetErrSMsg(code){
 		$("#gmsg").text("没有加入任何球队!");
 	}else if(115 == code){
 		$("#gmsg").text("球队已经报名!");
+	}else if(116 == code){
+		$("#gmsg").text("请填写球队名称!");
+	}else if(117 == code){
+		$("#gmsg").text("日期格式错误 例:1990-01-01");
 	}
 	
 	$("#gmsg").show();
@@ -708,9 +716,14 @@ function teamSubmit(){
 }
 
 function loadInitGameList(){
+	var code = $("#code").val();
+	data = {
+		code:code
+	};
 	$.ajax({
         url: "/c/g/ggl",
         type: "get",
+        data: data,
         dataType: "text",
         success:function(msg){
         	var obj = jQuery.parseJSON(msg);

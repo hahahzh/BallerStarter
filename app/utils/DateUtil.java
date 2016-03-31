@@ -172,17 +172,14 @@ public class DateUtil {
 
 		}
 
-		try {
+			try {
+				return simple.parse(date);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
 
-			return simple.parse(date);
 
-		} catch (ParseException e) {
-
-			e.printStackTrace();
-
-		}
-
-		return null;
 
 	}
 

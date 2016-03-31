@@ -230,7 +230,9 @@ public class Master extends Controller {
 			m.nickname = nickname;
 		}
 		if(!StringUtil.isEmpty(birthday)){
-			m.birthday = DateUtil.reverse2Date(birthday);
+				m.birthday = DateUtil.reverse2Date(birthday);
+				if(m.birthday == null)renderFail("error_parameter_date");
+			
 		}
 		if(!StringUtil.isEmpty(gender)){
 			m.gender = gender;
@@ -354,7 +356,7 @@ public class Master extends Controller {
 	
 	public static void getPubMemberInfo(Long pId) {
 		Member m = Member.findById(pId);
-		play.Logger.info("getMemberInfo m="+m.toString());
+		play.Logger.info("getPubMemberInfo m="+m.toString());
 		JSONObject results = initResultJSON();
 		results.put("pId", m.id);
 		results.put("name", m.name+"");
@@ -388,8 +390,8 @@ public class Master extends Controller {
 		results.put("constellation", m.constellation==null?"":m.constellation.name);
 		results.put("blood", m.blood==null?"":m.blood.name);
 		results.put("updated_at_ch", m.updated_at_ch+"");
-		play.Logger.info("getMemberInfo"+results.toString());
-		play.Logger.info("getMemberInfo end");
+		play.Logger.info("getPubMemberInfo"+results.toString());
+		play.Logger.info("getPubMemberInfo end");
 		renderSuccess(results);
 	}
 
@@ -441,6 +443,7 @@ public class Master extends Controller {
 		Team t = Team.find("coach_id=?", s.member.id).first();
 		if(t == null)Team.find("captain_id=?", s.member.id).first();
 		if(t == null){
+			if(StringUtil.isEmpty(name))renderFail("error_teamname_null");
 			t = new Team();
 			t.updated_at_ch = new Date();
 		}
@@ -624,10 +627,10 @@ public class Master extends Controller {
 	public static void getTeamList(@Required Long pId) {
 				
 		List<Team> tl = JPA.em().createNativeQuery("select * from teams, teams_members where teams_members.members_id = "+pId+" and teams.id=teams_members.teams_id", Team.class).getResultList();
-				
+		List<Team> tl2 = Team.find("captain_id=? or coach_id=?", pId, pId).fetch(); 
 		JSONObject results = initResultJSON();
 		
-		if(tl != null && tl.size() > 0){
+		if((tl != null && tl.size() > 0) || (tl2 != null && tl2.size() > 0)){
 			JSONArray datalist = initResultJSONArray();
 			for(Team t:tl){
 				JSONObject data = initResultJSON();
@@ -640,6 +643,24 @@ public class Master extends Controller {
 					data.put("logo", TLOGO);
 				}
 				datalist.add(data);
+			}
+			for(Team t2:tl2){
+				boolean f = true;
+				for(Team t:tl){
+					if(t.id == t2.id)f=false;
+				}
+				if(f){
+					JSONObject data = initResultJSON();
+					data.put("id", t2.id);
+					data.put("name", t2.name);
+					data.put("updated_at_ch", SDF_TO_DAY.format(t2.updated_at_ch));
+					if(t2.logo != null && t2.logo.exists()){
+						data.put("logo", "/c/download?id=" + t2.id + "&fileID=logo&entity=" + t2.getClass().getName() + "&z=" + 1);
+					}else{
+						data.put("logo", TLOGO);
+					}
+					datalist.add(data);
+				}
 			}
 			results.put("teamlist", datalist);
 		}else{
@@ -723,7 +744,9 @@ public class Master extends Controller {
 	 * @param z
 	 * @throws ParseException
 	 */
-	public static void getGameList(Long pId) throws ParseException {
+	public static void getGameList(String code, Long pId) throws ParseException {
+		
+		if(!StringUtil.isEmpty(code))validateSessionID(code, "");
 		
 		if (Validation.hasErrors()) {
 			renderFail("error_parameter_required");
@@ -731,11 +754,20 @@ public class Master extends Controller {
 						
 		List<Game> gl = null;
 		if(pId == null){
-			gl = Game.find("isShow = 1 order by id desc").fetch();	
+			gl = Game.find("isShow = 1 order by id desc").fetch();
 		}else{
 			List<Team> tl = JPA.em().createNativeQuery("select * from teams, teams_members where teams_members.members_id = "+pId+" and teams.id=teams_members.teams_id", Team.class).getResultList();
+			List<Team> tl2 = Team.find("captain_id=? or coach_id=?", pId, pId).fetch();
 			String tid ="";
 			for(Team t:tl)tid += t.id+",";
+			
+			for(Team t2:tl2){
+				boolean f = true;
+				for(Team t:tl){
+					if(t.id == t2.id)f=false;
+				}
+				if(f)tid += t2.id+",";
+			}
 			if(tid.length()>1)tid = tid.substring(0, tid.length()-1);
 			gl = JPA.em().createNativeQuery("select * from games, games_teams where games.id=games_teams.games_id and games_teams.teams_id in("+tid+")", Game.class).getResultList();
 		}
@@ -965,7 +997,7 @@ public class Master extends Controller {
 			data.put("name", r.home_team.name+" VS "+r.visiting_team.name);
 			data.put("point", r.home_team_point+" : "+r.visiting_team_point);
 			data.put("type", r.gameType.name);
-			data.put("date", r.date);
+			data.put("date", SDF_TO_DAY.format(r.date));
 			datalist.add(data);
 		}
 		results.put("datalist", datalist);
