@@ -450,7 +450,9 @@ public class Master extends Controller {
 			if(StringUtil.isEmpty(name))renderFail("error_teamname_null");
 			t = new Team();
 			t.updated_at_ch = new Date();
+			t.members.add(s.member);
 		}
+
 		if(t != null){
 			if(logo != null){
 				if(t.logo.exists()){
